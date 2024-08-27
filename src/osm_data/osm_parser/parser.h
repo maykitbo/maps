@@ -1,33 +1,43 @@
 #pragma once
 
-#include <nlohmann/json.hpp>
+
 #include <fstream>
 #include <ranges>
 
-#include "config.h"
+#include "../../settings/config.h"
+#include "../../settings/types.h"
+
+
+namespace maykitbo::maps {
+
 
 struct OsmParser {
-    using njson = nlohmann::json;
-    static njson getJson(unsigned idx);
+    static json_t getJson(data_idx_t idx);
+
+    static const json_t& getFeatures(const json_t& data);
 
     // reaturn vector of 4 floats: south, west, north, east
     // if idx is not exists return empty vector
-    static std::vector<double> getBbox(unsigned idx);
+    static std::vector<coord_t> getBbox(data_idx_t idx);
 
-    static std::string getType(const njson& feature);
-    static long long getId(const njson& feature);
-    static bool isNode(const njson& feature);
-    static bool isWay(const njson& feature);
+    static std::string getType(const json_t& feature);
+    static feat_idx_t getId(const json_t& feature);
+    static bool isNode(const json_t& feature);
+    static bool isWay(const json_t& feature);
 
     // for nodes
-    static double getLat(const njson& feature);
-    static double getLon(const njson& feature);
+    static coord_t getLat(const json_t& feature);
+    static coord_t getLon(const json_t& feature);
 
     // for ways
-    static const auto getNodes(const njson& feature)
+    static const auto getNodes(const json_t& feature)
     {
-        return feature["properties"]["nodes"] | std::views::transform([](const njson& node) {
-            return node.get<long long>();
-        });
+        return feature["properties"]["nodes"] |
+            std::views::transform([](const json_t& node) {
+                return node.get<feat_idx_t>();
+            });
     }
 };
+
+
+} // namespace maykitbo::maps

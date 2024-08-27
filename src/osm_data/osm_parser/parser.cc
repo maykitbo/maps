@@ -1,23 +1,33 @@
 #include "parser.h"
 
-nlohmann::json OsmParser::getJson(unsigned idx)
+
+using namespace maykitbo::maps;
+
+
+json_t OsmParser::getJson(data_idx_t idx)
 {
     std::ifstream f(OsmConfig::getDataPath(idx));
-    return njson::parse(f);
+    return json_t::parse(f);
 }
 
 
-std::vector<double> OsmParser::getBbox(unsigned idx)
+const json_t& OsmParser::getFeatures(const json_t& data)
 {
-    std::vector<double> bbox;
+    return data["features"];
+}
+
+
+std::vector<coord_t> OsmParser::getBbox(data_idx_t idx)
+{
+    std::vector<coord_t> bbox;
     std::ifstream f(OsmConfig::getDescriptionPath());
-    for (int k = 0; k < idx && f; ++k)
+    for (data_idx_t k = 0; k < idx && f; ++k)
     {
         f.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
     if (f.peek() != '\n' && f.peek() != EOF)
     {
-        int i = 0;
+        data_idx_t i = 0;
         f >> i;
         if (i != idx)
         {
@@ -30,37 +40,37 @@ std::vector<double> OsmParser::getBbox(unsigned idx)
 }
 
 
-bool OsmParser::isNode(const njson& feature)
+bool OsmParser::isNode(const json_t& feature)
 {
     return getType(feature) == "node";
 }
 
 
-bool OsmParser::isWay(const njson& feature)
+bool OsmParser::isWay(const json_t& feature)
 {
     return getType(feature) == "way";
 }
 
 
-std::string OsmParser::getType(const njson& feature)
+std::string OsmParser::getType(const json_t& feature)
 {
     return feature["properties"]["type"];
 }
 
 
-long long OsmParser::getId(const njson& feature)
+feat_idx_t OsmParser::getId(const json_t& feature)
 {
     return feature["properties"]["id"];
 }
 
 
-double OsmParser::getLat(const njson& feature)
+coord_t OsmParser::getLat(const json_t& feature)
 {
     return feature["geometry"]["coordinates"][1];
 }
 
 
-double OsmParser::getLon(const njson& feature)
+coord_t OsmParser::getLon(const json_t& feature)
 {
     return feature["geometry"]["coordinates"][0];
 }

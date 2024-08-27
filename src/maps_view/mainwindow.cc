@@ -58,7 +58,7 @@ void MainWindow::drawGraph(int idx)
 
     std::map<long long, QPointF> nodes;
 
-    for (const auto &feature : data["features"])
+    for (const auto &feature : OsmParser::getFeatures(data))
     {
         if (OsmParser::isNode(feature))
         {
