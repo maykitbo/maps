@@ -1,0 +1,5 @@
+__pycache__
+*.json
+description.txt
+build
+maps
