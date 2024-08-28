@@ -3,3 +3,5 @@ __pycache__
 description.txt
 build
 maps
+.vscode
+src_old
