@@ -1,14 +1,13 @@
 #pragma once
 
-#include <QMainWindow>
-#include <QGraphicsView>
-#include <QGraphicsScene>
-#include <nlohmann/json.hpp>
 
-QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
-QT_END_NAMESPACE
+#include "idata"
+#include "icore"
+#include "mainwindow.h"
 
+
+namespace maykitbo::maps
+{
 
 
 class MainWindow : public QMainWindow
@@ -20,9 +19,13 @@ class MainWindow : public QMainWindow
         ~MainWindow();
 
     private:
-        Ui::MainWindow *ui;
+        IData* data_;
+        ICore* core_;
+
         QGraphicsView *view_;
         QGraphicsScene *scene_;
         void drawGraph(int idx);
 };
 
+
+} // namespace maykitbo::maps
