@@ -2,3 +2,7 @@ __pycache__
 build
 maps
 .vscode
+xapi_meta*
+osm_data/
+a.out
+src1
