@@ -131,8 +131,7 @@ void PostGISConnector::listColumns(const std::string& table)
 
 
 pqxx::result PostGISConnector::fetchGeoJSONByBBOX(const std::string& table,
-                                                fp_type xmin, fp_type ymin,
-                                                fp_type xmax, fp_type ymax,
+                                                const bbox_s& bbox,
                                                 int srid_out)
 {
     srid_ = sridCheck(table);
@@ -143,10 +142,7 @@ pqxx::result PostGISConnector::fetchGeoJSONByBBOX(const std::string& table,
         FROM planet_osm_roads
         WHERE planet_osm_roads.way && ST_Transform(
             ST_MakeEnvelope()" +
-                std::to_string(xmin) + ", " +
-                std::to_string(ymin) + ", " +
-                std::to_string(xmax) + ", " +
-                std::to_string(ymax) + ", " +
+                bboxToQueryString(bbox) + ", " +
                 std::to_string(srid_out) + "), " +
             std::to_string(srid_) +
         ");";
@@ -161,52 +157,11 @@ pqxx::result PostGISConnector::fetchGeoJSONByBBOX(const std::string& table,
 }
 
 
-
-
-
-
-pqxx::result PostGISConnector::fetchGeometriesByBBOX(const std::string& table,
-                                                     fp_type xmin, fp_type ymin,
-                                                     fp_type xmax, fp_type ymax)
+std::string PostGISConnector::bboxToQueryString(const bbox_s& bbox)
 {
-    std::string query = "SELECT ST_AsBinary(way) AS geom "
-                        "FROM " + table + " "
-                        "WHERE way && ST_MakeEnvelope(" +
-                        std::to_string(xmin) + ", " +
-                        std::to_string(ymin) + ", " +
-                        std::to_string(xmax) + ", " +
-                        std::to_string(ymax) + ", 4326);";
-
-    pqxx::result R = executeNonTransactionalQuery(query);
-    if (!R.empty())
-        std::cout << "Data fetched successfully.\n";
-    else
-        std::cout << "No data found.\n";
-    return R;
+    return std::to_string(bbox.left_top.lon) + ", " +
+           std::to_string(bbox.right_buttom.lat) + ", " +
+           std::to_string(bbox.right_buttom.lon) + ", " +
+           std::to_string(bbox.left_top.lat);
 }
-
-
-
-void PostGISConnector::fetchInitialData(const std::string& table, int limit)
-{
-    std::string query = "SELECT * FROM " + table + " LIMIT " + std::to_string(limit) + ";";
-    pqxx::result R = executeNonTransactionalQuery(query);
-    if (!R.empty())
-    {
-        std::cout << "Initial data fetched successfully:\n";
-        for (const auto& row : R)
-        {
-            for (const auto& field : row)
-            {
-                std::cout << field.c_str() << "\t";
-            }
-            std::cout << "\n";
-        }
-    }
-    else
-    {
-        std::cout << "No data found.\n";
-    }
-}
-
 

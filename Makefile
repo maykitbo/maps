@@ -1,0 +1,18 @@
+BUILD_FOLDER=build
+PROJECT_NAME=maps
+MAKE_FLAGS=-j4
+CMAKE_FOLDER=src
+DATA_CMAKE_FOLDER=src/data
+DATA_MANAGER_TEST_NAME=test_database_manager
+TEST_CMAKE_FLAG=DBUILD_TESTS
+
+
+
+data_manager_test:
+	cmake -S $(DATA_CMAKE_FOLDER) -B $(BUILD_FOLDER) -$(TEST_CMAKE_FLAG)=ON
+	make -C $(BUILD_FOLDER)
+	./$(BUILD_FOLDER)/$(DATA_MANAGER_TEST_NAME)
+
+
+clean:
+	rm -rf build/*

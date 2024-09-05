@@ -4,6 +4,8 @@
 #include <iostream>
 #include <pqxx/pqxx>
 
+#include "types.h"
+
 
 namespace maykitbo::maps
 {
@@ -12,7 +14,7 @@ namespace maykitbo::maps
 class PostGISConnector
 {
     public:
-        using fp_type = double;
+        using fp_type = coord_t;
 
         PostGISConnector() = default;
         ~PostGISConnector();
@@ -23,19 +25,11 @@ class PostGISConnector
         void fetchData(const std::string& query);
         void listTables();
         pqxx::result fetchGeoJSONByBBOX(const std::string& table,
-                                        fp_type xmin, fp_type ymin,
-                                        fp_type xmax, fp_type ymax,
+                                        const bbox_s& bbox,
                                         int srid_out = 4326);
         void listColumns(const std::string& table);
 
         int getSRID() const { return srid_; }
-
-
-        // debug
-        pqxx::result fetchGeometriesByBBOX(const std::string& table,
-                                fp_type xmin, fp_type ymin,
-                                fp_type xmax, fp_type ymax);
-        void fetchInitialData(const std::string& table, int limit = 10);
 
     protected:
         std::string conn_str_;
@@ -47,6 +41,8 @@ class PostGISConnector
         void disconnect();
 
         int sridCheck(const std::string& table);
+
+        std::string bboxToQueryString(const bbox_s& bbox);
 };
 
 

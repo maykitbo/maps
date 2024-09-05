@@ -54,7 +54,8 @@ int main()
 
     std::cout << "\nFetch BBOX:\n";
     // auto R = db.fetchGeoJSONByBBOX("planet_osm_roads", 36.14, 40.99, 56.27, 56.49);
-    auto R = db.fetchGeoJSONByBBOX("planet_osm_polygon", 37.7, 55.7, 38.0, 56.0);
+    auto R = db.fetchGeoJSONByBBOX("planet_osm_polygon",
+                bbox_s{37.7, 56.00, 38.00, 55.7});
 
     return 0;
 }   
