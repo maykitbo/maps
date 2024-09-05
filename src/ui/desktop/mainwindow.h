@@ -7,7 +7,7 @@
 
 
 #include "idata"
-#include "icore"
+// #include "icore"
 
 
 namespace maykitbo::maps
@@ -27,7 +27,7 @@ class MainWindow : public QMainWindow
 
     private:
         IData* data_;
-        ICore* core_;
+        // ICore* core_;
 
         QGraphicsView *view_;
         QGraphicsScene *scene_;
