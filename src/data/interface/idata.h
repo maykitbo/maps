@@ -2,6 +2,7 @@
 
 
 #include "postgis_connector.h"
+#include "config.h"
 
 
 namespace maykitbo::maps
@@ -11,11 +12,9 @@ namespace maykitbo::maps
 class IData
 {
     public:
-        IData()
+        IData(const std::string &connect_string = Conf::postgis)
         {
-            pgc.connect(
-                "dbname = osm_db user = postgres password = postgres hostaddr = 127.0.0.1 port = 5432"
-            );
+            pgc.connect(connect_string);
         }
         PostGISConnector& operator()() { return pgc; }
         // ~IData();

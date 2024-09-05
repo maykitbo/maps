@@ -1,4 +1,4 @@
-#include "postgis_connector.h"
+#include "idata.h"
 
 
 using namespace maykitbo::maps;
@@ -27,13 +27,9 @@ int main()
 
     // return 0;
 
+    IData db;
 
-    std::string connection_info =
-        "dbname = osm_db user = postgres password = postgres hostaddr = 127.0.0.1 port = 5432";
-    PostGISConnector db;
-    db.connect(connection_info);
-
-    db.listTables();
+    db().listTables();
     // db.listColumns("geography_columns");
     // db.listColumns("geometry_columns");
     // db.listColumns("spatial_ref_sys");
@@ -44,7 +40,7 @@ int main()
     // db.listColumns("planet_osm_line");
     // db.listColumns("pointsofinterest");
     // db.listColumns("configuration");
-    db.listColumns("planet_osm_polygon");
+    // db().listColumns("planet_osm_polygon");
     // db.listColumns("planet_osm_roads");
     // return 0;
 
@@ -54,7 +50,7 @@ int main()
 
     std::cout << "\nFetch BBOX:\n";
     // auto R = db.fetchGeoJSONByBBOX("planet_osm_roads", 36.14, 40.99, 56.27, 56.49);
-    auto R = db.fetchGeoJSONByBBOX("planet_osm_polygon",
+    auto R = db().fetchGeoJSONByBBOX("planet_osm_polygon",
                 bbox_s{37.7, 56.00, 38.00, 55.7});
 
     return 0;

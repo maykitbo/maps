@@ -20,6 +20,7 @@ set(HEADERS
     ${DATA_MANAGER_DIR}/postgis_connector.h
     ${INTERFACE_DIR}/idata.h
     ${SHARED_DIR}/types.h
+    ${SHARED_DIR}/config.h
 )
 
 set(TEST_SOURCES
@@ -42,6 +43,5 @@ option(BUILD_TESTS "Build the tests" OFF)
 
 if(BUILD_TESTS)
     add_executable(test_database_manager ${TEST_SOURCES})
-    
     target_link_libraries(test_database_manager PRIVATE ${PROJECT_NAME})
 endif()
