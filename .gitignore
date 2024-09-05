@@ -6,3 +6,5 @@ xapi_meta*
 osm_data/
 a.out
 src1
+*.pbf
+*.txt
