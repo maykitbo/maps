@@ -3,8 +3,10 @@
 
 #include <iostream>
 #include <pqxx/pqxx>
+#include <nlohmann/json.hpp>
 
 #include "types.h"
+#include "queries.h"
 
 
 namespace maykitbo::maps
@@ -22,11 +24,10 @@ class PostGISConnector
         void connect(const std::string& conn_str);
         void executeQuery(const std::string& query);
         pqxx::result executeNonTransactionalQuery(const std::string& query);
-        void fetchData(const std::string& query);
         void listTables();
-        pqxx::result fetchGeoJSONByBBOX(const std::string& table,
-                                        const bbox_s& bbox,
-                                        int srid_out = 4326);
+        nlohmann::json fetchGeoJsonByBBOX(const std::string& table,
+                                    const bbox_s& bbox,
+                                    int srid_out = 4326);
         void listColumns(const std::string& table);
 
         int getSRID() const { return srid_; }
@@ -41,8 +42,7 @@ class PostGISConnector
         void disconnect();
 
         int sridCheck(const std::string& table);
-
-        std::string bboxToQueryString(const bbox_s& bbox);
+        nlohmann::json toNlohman();
 };
 
 

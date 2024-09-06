@@ -15,6 +15,8 @@ using namespace maykitbo::maps;
 int main()
 {
 
+
+
     // std::string A = "0101000020110F000031DF50D7674657412E8E4F9F4C065241";
     // std::cout << A.size() << '\n';
     // for (int k = 0; k < A.size(); ++k) {
@@ -29,7 +31,7 @@ int main()
 
     IData db;
 
-    db().listTables();
+    // db().listTables();
     // db.listColumns("geography_columns");
     // db.listColumns("geometry_columns");
     // db.listColumns("spatial_ref_sys");
@@ -50,8 +52,12 @@ int main()
 
     std::cout << "\nFetch BBOX:\n";
     // auto R = db.fetchGeoJSONByBBOX("planet_osm_roads", 36.14, 40.99, 56.27, 56.49);
-    auto R = db().fetchGeoJSONByBBOX("planet_osm_polygon",
-                bbox_s{37.7, 56.00, 38.00, 55.7});
+    auto R = db.fetchPolygons(bbox_s{37.8, 56.00, 38.00, 55.8});
+
+    // std::cout << R['features'][0];
+    
+    // std::cout << "R.size() = " << R.size() << '\t';
+    // std::cout << "R[0].size = " << R[0].size() << '\n';
 
     return 0;
 }   
