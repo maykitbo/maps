@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(data_manager VERSION 0.1 LANGUAGES CXX)
+project(database_lib VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -48,6 +48,6 @@ target_link_libraries(${PROJECT_NAME} PUBLIC -lpqxx -lpq)
 option(BUILD_TESTS "Build the tests" OFF)
 
 if(BUILD_TESTS)
-    add_executable(test_database_manager ${TEST_SOURCES})
-    target_link_libraries(test_database_manager PRIVATE ${PROJECT_NAME})
+    add_executable(test_database_lib ${TEST_SOURCES})
+    target_link_libraries(test_database_lib PRIVATE ${PROJECT_NAME})
 endif()

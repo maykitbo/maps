@@ -6,7 +6,7 @@ using namespace maykitbo::maps;
 
 void PostGISConnector::handleException(const std::exception& e)
 {
-    std::cerr << "M Error: " << e.what() << '\n';
+    std::cerr << "PostGisConnector Error: " << e.what() << '\n';
 }
 
 
@@ -122,13 +122,13 @@ nlohmann::json PostGISConnector::fetchGeoJsonByBBOX(const std::string& table,
 
     pqxx::result R = executeNonTransactionalQuery(
         PostGisQuery::BBOXtoGeoJson(table, bbox, srid_out, srid_));
-    std::cout << "GeoJSON data fetched successfully\n";
 
     if (R.empty())
     {
         std::cout << "No data fund\n";
         return nlohmann::json::object();
     }
+    std::cout << "GeoJSON data fetched successfully\n";
     return nlohmann::json::parse(std::move(R[0][0].c_str()));
 }
 

@@ -54,11 +54,11 @@ int main()
     // auto R = db.fetchGeoJSONByBBOX("planet_osm_roads", 36.14, 40.99, 56.27, 56.49);
     auto R = db.fetchPolygons(bbox_s{37.8, 56.00, 38.00, 55.8});
 
-    R.features([&] (const GeoJson::Feature& feature) {
-        feature.geomWay([&] (point_s p) {
-            std::cout << p.lat << '\t' << p.lon << '\n';
-        });
-    });
+    // R.features([&] (const GeoJson::Feature& feature) {
+    //     feature.geomWay([&] (point_s p) {
+    //         std::cout << p.lat << '\t' << p.lon << '\n';
+    //     });
+    // });
 
 
     

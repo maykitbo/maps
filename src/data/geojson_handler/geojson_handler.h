@@ -4,6 +4,7 @@
 #include <nlohmann/json.hpp>
 #include <functional>
 #include <unordered_map>
+#include <iostream>
 
 #include "types.h"
 

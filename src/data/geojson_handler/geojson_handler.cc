@@ -10,6 +10,11 @@ GeoJson::GeoJson(data_t&& data)
 
 void GeoJson::features(const std::function<void(const Feature&)>& func) const
 {
+    if (!data_.contains("features"))
+    {
+        std::cerr << "GeoJSON Error: json does not contains Features\n";
+        return;
+    }
     for (const auto& feature : data_["features"])
         func(Feature(feature));
 }
