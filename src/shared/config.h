@@ -11,11 +11,11 @@ namespace maykitbo::maps
 struct Conf
 {
     inline static const std::string postgis = R"(
-        dbname = ***
-        user = ***
-        password = ***
-        hostaddr = ***
-        port = ***
+        dbname = osm_db
+        user = postgres
+        password = postgres
+        hostaddr = 127.0.0.1
+        port = 5432
     )";
 };
 
