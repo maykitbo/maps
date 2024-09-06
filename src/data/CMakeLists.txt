@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(INTERFACE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/interface)
-set(DATA_STRUCTURE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/data_structure)
+set(DATA_STRUCTURE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/geojson_handler)
 set(DATA_MANAGER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/database_manager)
 set(SHARED_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../shared)
 set(TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
@@ -16,7 +16,7 @@ set(TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(SOURCES
     ${DATA_MANAGER_DIR}/postgis_connector.cc
     ${INTERFACE_DIR}/idata.cc
-    ${DATA_STRUCTURE_DIR}/data_structure.cc
+    ${DATA_STRUCTURE_DIR}/geojson_handler.cc
 )
 
 set(HEADERS
@@ -25,7 +25,7 @@ set(HEADERS
     ${INTERFACE_DIR}/idata.h
     ${SHARED_DIR}/types.h
     ${SHARED_DIR}/config.h
-    ${DATA_STRUCTURE_DIR}/data_structure.h
+    ${DATA_STRUCTURE_DIR}/geojson_handler.h
 )
 
 set(TEST_SOURCES

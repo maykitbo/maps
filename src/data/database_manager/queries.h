@@ -51,7 +51,7 @@ class PostGisQuery
                                             srid_out_s +
                                         R"()
                                     )::jsonb,
-                    'properties',   to_jsonb(properties) - 'way'
+                    'properties',   jsonb_strip_nulls(to_jsonb(properties) - 'way')
                 ) AS feature
                 FROM ()" + std::string(R"(
                         SELECT *

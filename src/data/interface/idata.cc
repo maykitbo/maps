@@ -10,27 +10,27 @@ IData::IData(const std::string &connect_string)
 }
 
 
-OsmData IData::fetch(const std::string& table, const bbox_s& bbox, int srid)
+GeoJson IData::fetch(const std::string& table, const bbox_s& bbox, int srid)
 {
-    return OsmData(std::move(pgc_.fetchGeoJsonByBBOX(table, bbox, srid))); 
+    return GeoJson(std::move(pgc_.fetchGeoJsonByBBOX(table, bbox, srid))); 
 }
 
 
-OsmData IData::fetchRoads(const bbox_s& bbox, int srid)
+GeoJson IData::fetchRoads(const bbox_s& bbox, int srid)
 {
-    return OsmData(std::move(pgc_.fetchGeoJsonByBBOX("planet_osm_roads", bbox, srid)));
+    return GeoJson(std::move(pgc_.fetchGeoJsonByBBOX("planet_osm_roads", bbox, srid)));
 }                        
 
 
-OsmData IData::fetchPoints(const bbox_s& bbox, int srid)
+GeoJson IData::fetchPoints(const bbox_s& bbox, int srid)
 {
-    return OsmData(std::move(pgc_.fetchGeoJsonByBBOX("planet_osm_point", bbox, srid)));
+    return GeoJson(std::move(pgc_.fetchGeoJsonByBBOX("planet_osm_point", bbox, srid)));
 }                        
 
 
-OsmData IData::fetchPolygons(const bbox_s& bbox, int srid)
+GeoJson IData::fetchPolygons(const bbox_s& bbox, int srid)
 {
-    return OsmData(std::move(pgc_.fetchGeoJsonByBBOX("planet_osm_polygon", bbox, srid)));
+    return GeoJson(std::move(pgc_.fetchGeoJsonByBBOX("planet_osm_polygon", bbox, srid)));
 }                            
 
 
