@@ -6,8 +6,7 @@
 #include <QGraphicsScene>
 
 
-#include "idata"
-// #include "icore"
+#include "idata.h"
 
 
 namespace maykitbo::maps
@@ -19,19 +18,15 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
     public:
-        MainWindow(QWidget *parent = nullptr);
-        ~MainWindow();
-
-        void setCore(ICore* core);
-        void setData(IData* data);
+        MainWindow(IData& data, QWidget *parent = nullptr);
+        // ~MainWindow();
 
     private:
-        IData* data_;
-        // ICore* core_;
+        IData& data_;
 
         QGraphicsView *view_;
         QGraphicsScene *scene_;
-        void drawGraph(int idx);
+        void drawMap(const bbox_s& bbox);
 };
 
 
