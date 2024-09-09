@@ -15,14 +15,22 @@ find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
 
 set(DB_LIB_PATH CACHE PATH "Path to the database library")
+set(CORE_LIB_PATH CACHE PATH "Path to the database library")
 
 set(HEADERS
     mainwindow.h
+    scene/scene.h
+    scene/sceneset.h
+    scene/mapitems.h
+    scene/map_style.h
 )
 
 set(SOURCES
     main.cc
     mainwindow.cc
+    scene/scene.cc
+    scene/sceneset.cc
+    scene/mapitems.cc
 )
 
 set(UI
@@ -34,10 +42,15 @@ set(RESOURCES
 )
 
 add_subdirectory(${DB_LIB_PATH} ${CMAKE_BINARY_DIR}/database_lib_build)
+add_subdirectory(${CORE_LIB_PATH} ${CMAKE_BINARY_DIR}/core_lib_build)
 
 add_executable(${PROJECT_NAME} ${HEADERS} ${SOURCES} ${UI})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets database_lib)
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    Qt${QT_VERSION_MAJOR}::Widgets
+    database_lib
+    core_lib
+)
 
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(${PROJECT_NAME})

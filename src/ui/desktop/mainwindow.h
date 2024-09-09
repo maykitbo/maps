@@ -3,10 +3,8 @@
 
 #include <QMainWindow>
 #include <QGraphicsView>
-#include <QGraphicsScene>
 
-
-#include "idata.h"
+#include "scene/scene.h"
 
 
 namespace maykitbo::maps
@@ -18,15 +16,16 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
     public:
-        MainWindow(IData& data, QWidget *parent = nullptr);
-        // ~MainWindow();
+        MainWindow(const IData& data, QWidget *parent = nullptr);
 
     private:
-        IData& data_;
+        const IData& data_;
 
         QGraphicsView *view_;
-        QGraphicsScene *scene_;
-        void drawMap(const bbox_s& bbox);
+        Scene *scene_;
+    
+    // signals:
+
 };
 
 
