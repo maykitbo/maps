@@ -80,6 +80,8 @@ public:
      */
     std::string toString() const;
 
+    const data_t& getJsonData() const;
+
 private:
     data_t data_;
 };
@@ -123,6 +125,14 @@ public:
      * @return A string representation of the feature.
      */
     std::string toString() const;
+
+    std::string propertiesToString() const;
+
+    const data_t& getJsonData() const;
+    bool isBuilding() const;
+    bool isApartment() const;
+    // bool isNatural() const;
+    // bool isWood() const;
 
 private:
     const data_t& data_;
