@@ -2,6 +2,7 @@
 
 
 #include <vector>
+#include <iostream>
 
 
 namespace maykitbo::maps
@@ -13,11 +14,11 @@ namespace maykitbo::maps
  */
 typedef double coord_t;
 
-/**
- * @typedef distance_t
- * Floating-point type for representing route lengths.
- */
-typedef double distance_t;
+// /**
+//  * @typedef distance_t
+//  * Floating-point type for representing route lengths.
+//  */
+// typedef long long int distance_t;
 
 /**
  * @typedef nodeid_t
@@ -55,15 +56,30 @@ struct point_s {
  * Represents a bounding box (rectangular area) on a map.
  */
 struct bbox_s {
-    /**
-     * Top-left corner of the bounding box.
-     */
-    point_s left_top;
+    // /**
+    //  * Top-left corner of the bounding box.
+    //  */
+    // point_s left_top;
 
-    /**
-     * Bottom-right corner of the bounding box.
-     */
-    point_s right_buttom;
+    // /**
+    //  * Bottom-right corner of the bounding box.
+    //  */
+    // point_s right_buttom;
+
+
+    coord_t max_lat;
+    coord_t min_lat;
+    coord_t max_lon;
+    coord_t min_lon;
+
+    friend std::ostream &operator<<(std::ostream& os, const bbox_s& b)
+    {
+        os << "max_lat = " << b.max_lat << '\n';
+        os << "min_lat = " << b.min_lat << '\n';
+        os << "max_lon = " << b.max_lon << '\n';
+        os << "min_lon = " << b.min_lon << '\n';
+        return os;
+    }
 
     /**
      * Constructs a bounding box with the given coordinates.
@@ -73,17 +89,18 @@ struct bbox_s {
      * @param right  Longitude of the right edge.
      * @param buttom Latitude of the bottom edge.
      */
-    bbox_s(coord_t left, coord_t top, coord_t right, coord_t buttom)
-        : left_top(top, left), right_buttom(buttom, right) {}
+    bbox_s(coord_t top, coord_t buttom, coord_t right, coord_t left)
+        : max_lat(top), min_lat(buttom), max_lon(right), min_lon(left) {}
+    bbox_s() = default;
 
-    /**
-     * Constructs a bounding box with the given top-left and bottom-right points.
-     *
-     * @param left_top      Top-left corner of the bounding box.
-     * @param right_buttom  Bottom-right corner of the bounding box.
-     */
-    bbox_s(const point_s& left_top, const point_s& right_buttom)
-        : left_top(left_top), right_buttom(right_buttom) {}
+    // /**
+    //  * Constructs a bounding box with the given top-left and bottom-right points.
+    //  *
+    //  * @param left_top      Top-left corner of the bounding box.
+    //  * @param right_buttom  Bottom-right corner of the bounding box.
+    //  */
+    // bbox_s(const point_s& left_top, const point_s& right_buttom)
+    //     : left_top(left_top), right_buttom(right_buttom) {}
 };
 
 /**
@@ -94,7 +111,8 @@ struct route_s {
     /**
      * Total length of the route.
      */
-    distance_t len;
+    // distance_t len;
+    coord_t len;
 
     /**
      * List of node IDs that define the route.

@@ -1,0 +1,7 @@
+wget -O map.osm "http://overpass.openstreetmap.ru/cgi/xapi_meta?*[bbox=53,36,56,39]"
+sudo -u postgres psql -c "CREATE DATABASE msk_osm_db;"
+sudo -u postgres psql -d osm_db -c "CREATE EXTENSION postgis;"
+sudo -u postgres psql -d osm_db -c "CREATE EXTENSION pgrouting;"
+sudo -u postgres psql -d osm_db -c "CREATE EXTENSION pgrouting;"
+sudo -u postgres psql osm --command='CREATE EXTENSION hstore;
+osm2pgsql -s -d osm_db -U postgres -W xapi_meta
