@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QGraphicsView>
+#include <QKeyEvent>
 
 #include "scene/scene.h"
 
@@ -23,9 +24,19 @@ class MainWindow : public QMainWindow
 
         QGraphicsView *view_;
         Scene *scene_;
-    
-    // signals:
 
+        void connectKeyEvents();
+        bool keyPress(QKeyEvent* key_event);
+    
+    signals:
+        void moveLeft();
+        void moveRight();
+        void moveUp();
+        void moveDown();
+    
+    protected:
+        bool eventFilter(QObject *object, QEvent *event);
+    
 };
 
 

@@ -28,7 +28,7 @@ class MapItem : public QGraphicsPathItem
         const GeoJson::Feature& feature_;
         QPolygonF polygon_;
         QPainterPath path_;
-        virtual void paint() = 0;
+        virtual bool paint() = 0;
 };
 
 
@@ -36,7 +36,7 @@ class PolygonItem : public MapItem
 {
     using MapItem::MapItem;
     public:
-        void paint() override;
+        bool paint() override;
 };
 
 
@@ -44,7 +44,7 @@ class RoadItem : public MapItem
 {
     using MapItem::MapItem;
     public:
-        void paint() override;
+        bool paint() override;
 };
 
 
@@ -52,7 +52,7 @@ class LineItem : public MapItem
 {
     using MapItem::MapItem;
     public:
-        void paint() override;
+        bool paint() override;
 };
 
 

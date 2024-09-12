@@ -11,37 +11,72 @@ MapItem::MapItem(const SceneSet& set, const MapStyle& style,
 
 void MapItem::draw()
 {
-    feature_.geomWay([&] (point_s point)
+    if (paint())
     {
-        polygon_.push_back(set_.adaptPoint(point));
-    });
-    path_.addPolygon(polygon_);
-    setPath(path_);
-    paint();
+        feature_.geomWay([&] (point_s point)
+        {
+            polygon_.push_back(set_.adaptPoint(point));
+        });
+        path_.addPolygon(polygon_);
+        setPath(path_);
+    }
 }
 
 
-void PolygonItem::paint()
+bool PolygonItem::paint()
 {
     if (feature_.isBuilding())
     {
-        setBrush(feature_.isApartment() ? style_.apartments : style_.buildings);
+        auto b_type = style_.buildings.find(feature_.buildingType());
+        if (b_type != style_.buildings.end())
+        {
+            setBrush(b_type->second);
+            return true;
+        }
+        else
+        {
+            std::cout << "NOT INT THE MAP " << feature_.propertiesToString() << "\n";
+        }
     }
     else
     {
-        // std::cout << feature_.propertiesToString() << "\n\n";
-        setPen(style_.basic_polygon);
+        if (feature_.isConstruction())
+        {
+            // setBrush(QBrush{QColor{255, 0, 0}});
+            // std::cout << "CONSTRUCTION BUT NOT BUILDING in " << feature_.propertiesToString() << '\n';
+            // return true;
+        }
     }
+    return false;
 }
 
 
-void RoadItem::paint()
+bool RoadItem::paint()
 {
     setPen(style_.basic_road);
+    return true;
 }
 
 
-void LineItem::paint()
+bool LineItem::paint()
 {
-    setPen(style_.basic_line);
+    if (feature_.isHighway())
+    {
+        auto hw_type = style_.roads.find(feature_.highwayType());
+        if (hw_type != style_.roads.end())
+        {
+            setPen(hw_type->second);
+            return true;
+        }
+        else
+        {
+            std::cout << "Unknown line.highway type: " <<
+                         feature_.getJsonData()["properties"]["highway"] << '\n';
+        }
+    }
+    else
+    {
+        // std::cout << "LINE IS NOT HIGHWAY " << feature_.propertiesToString() << '\n';
+    }
+    return false;
 }

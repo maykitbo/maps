@@ -11,8 +11,9 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
+
+find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets Concurrent REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets Concurrent REQUIRED)
 
 set(DB_LIB_PATH CACHE PATH "Path to the database library")
 set(CORE_LIB_PATH CACHE PATH "Path to the database library")
@@ -23,6 +24,8 @@ set(HEADERS
     scene/sceneset.h
     scene/mapitems.h
     scene/map_style.h
+
+    
 )
 
 set(SOURCES
@@ -48,6 +51,7 @@ add_executable(${PROJECT_NAME} ${HEADERS} ${SOURCES} ${UI})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::Concurrent
     database_lib
     core_lib
 )

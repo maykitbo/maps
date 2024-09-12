@@ -26,6 +26,8 @@ struct SceneSet
     void setScale();
     void setRect(int width);
     void setBbox(const bbox_s& bbox);
+    void move(coord_t x, coord_t y);
+    std::pair<bbox_s, bbox_s> halfBbox();
 
     friend std::ostream& operator<<(std::ostream& os, const SceneSet& ss)
     {

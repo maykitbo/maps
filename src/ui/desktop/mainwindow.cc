@@ -12,17 +12,99 @@ MainWindow::MainWindow(const IData& data, QWidget* parent) :
 {
     view_->setScene(scene_);
     setCentralWidget(view_);
+    
+    scene_->installEventFilter(this);
+    view_->installEventFilter(this);
+    setFocusPolicy(Qt::StrongFocus); 
+
+    connectKeyEvents();
 
     scene_->initMap();
 
     setGeometry(10, 10, scene_->width() * 1.05, scene_->height() * 1.05);
 }
-    // bboxes = [
-    // #   south    west    north   east
-    //     (55.810, 37.660, 55.812, 37.666),
-    //     (55.809, 37.655, 55.813, 37.666),
-    //     (55.809, 37.650, 55.814, 37.666),
-    //     (55.805, 37.650, 55.814, 37.666),
-    //     (55.800, 37.645, 55.812, 37.666)
-    // ]
+
+
+bool MainWindow::eventFilter(QObject *object, QEvent *event)
+{
+    if (event->type() == QEvent::KeyPress)
+    {
+        QKeyEvent* key_event = dynamic_cast<QKeyEvent*>(event);
+        return keyPress(key_event);
+    }
+    return false; 
+}
+
+
+bool MainWindow::keyPress(QKeyEvent* key_event)
+{
+    switch (key_event->key())
+    {
+        case Qt::Key_Left:
+            std::cout << "Left pressed\n";
+            emit moveLeft();
+            return true;
+
+        case Qt::Key_Right:
+            std::cout << "Right pressed\n";
+            emit moveRight();
+            return true;
+
+        case Qt::Key_Up:
+            std::cout << "Up pressed\n";
+            emit moveUp();
+            return true;
+
+        case Qt::Key_Down:
+            std::cout << "Down pressed\n";
+            emit moveDown();
+            return true;
+    }
+    return false;
+}
+
+
+void MainWindow::connectKeyEvents()
+{
+    connect(this,   &MainWindow::moveLeft,
+            scene_, &Scene::moveLeft);
+
+    // connect(this,   &MainWindow::moveLeft,
+    //     [&] () { std::cout << "Lambda move left\n"; });
+
+    connect(this,   &MainWindow::moveRight,
+            scene_, &Scene::moveRight);
+
+    connect(this,   &MainWindow::moveUp,
+            scene_, &Scene::moveUp);
+
+    connect(this,   &MainWindow::moveDown,
+            scene_, &Scene::moveDown);
+}
+
+
+// void MainWindow::keyPressEvent(QKeyEvent* e)
+// {
+//     std::cout << "Key pressed\n";
+//     switch (e->key()) {
+//         case Qt::Key_Left:
+//             std::cout << "Left pressed\n";
+//             emit moveLeft();
+//             break;
+//         case Qt::Key_Right:
+//             std::cout << "Right pressed\n";
+//             emit moveRight();
+//             break;
+//         case Qt::Key_Up:
+//             std::cout << "Up pressed\n";
+//             emit moveUp();
+//             break;
+//         case Qt::Key_Down:
+//             std::cout << "Down pressed\n";
+//             emit moveDown();
+//             break;
+//         default:
+//             QMainWindow::keyPressEvent(e);  // Pass the event to the base class for default handling
+//     }
+// }
 
