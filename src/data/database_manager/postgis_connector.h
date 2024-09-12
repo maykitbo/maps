@@ -2,11 +2,13 @@
 
 
 #include <iostream>
+#include <thread>
 #include <pqxx/pqxx>
 #include <nlohmann/json.hpp>
 
 #include "types.h"
 #include "queries.h"
+#include "log.h"
 
 
 namespace maykitbo::maps
@@ -15,14 +17,15 @@ namespace maykitbo::maps
 
 class PostGISConnector
 {
+    mutable Log<true> LOG{std::string{"PstgisConnector.log"}};
+
     public:
         using fp_type = coord_t;
 
-        PostGISConnector() = default;
+        PostGISConnector(const std::string& conn_str);
         ~PostGISConnector();
 
-        void connect(const std::string& conn_str);
-        void executeQuery(const std::string& query);
+        // void connect(const std::string& conn_str);
         pqxx::result executeNonTransactionalQuery(const std::string& query) const;
         void listTables() const;
         nlohmann::json fetchGeoJsonByBBOX(const std::string& table,
@@ -36,7 +39,7 @@ class PostGISConnector
         std::string conn_str_;
         pqxx::connection *c_ = nullptr;
 
-        mutable int srid_;
+        mutable int srid_ = 3857;
 
         void handleException(const std::exception& e) const;
         void disconnect();

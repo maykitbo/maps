@@ -25,6 +25,7 @@ set(HEADERS
     ${INTERFACE_DIR}/idata.h
     ${SHARED_DIR}/types.h
     ${SHARED_DIR}/config.h
+    ${SHARED_DIR}/log.h
     ${DATA_STRUCTURE_DIR}/geojson_handler.h
 )
 

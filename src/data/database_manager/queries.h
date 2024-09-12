@@ -38,33 +38,6 @@ class PostGisQuery
         {
         std::string srid_out_s = std::to_string(srid_out);
         std::string srid_in_s = std::to_string(srid_in);
-        // return R"(
-        //     SELECT jsonb_build_object(
-        //         'type',     'FeatureCollection',
-        //         'features', jsonb_agg(features.feature)
-        //     )
-        //     FROM (
-        //         SELECT jsonb_build_object(
-        //             'type',         'Feature',
-        //             'geometry',     ST_AsGeoJSON(ST_Transform(
-        //                                     way, )" +
-        //                                     srid_out_s +
-        //                                 R"()
-        //                             )::jsonb,
-        //             'properties',   jsonb_strip_nulls(to_jsonb(properties) - 'way')
-        //         ) AS feature
-        //         FROM ()" + std::string(R"(
-        //                 SELECT *
-        //                 FROM planet_osm_roads
-        //                 WHERE planet_osm_roads.way && ST_Transform(
-        //                     ST_MakeEnvelope()" +
-        //                         bboxToQueryString(bbox) + ", " +
-        //                         srid_out_s + "), " +
-        //                     srid_in_s +
-        //                 ")") + std::string(R"(
-        //         ) AS properties
-        //     ) AS features;
-        // )");
 
         return R"(
             SELECT jsonb_build_object(
@@ -94,6 +67,35 @@ class PostGisQuery
             ) AS features
             LIMIT 10000;
             )");
+        }
+
+        static std::string explainAnalize(const std::string& table,
+                                        const bbox_s& bbox,
+                                        int srid_out,
+                                        int srid_in)
+        {
+            return R"(
+                EXPLAIN ANALYZE
+                SELECT jsonb_build_object(
+                    'type', 'FeatureCollection',
+                    'features', jsonb_agg(features.feature)
+                )
+                FROM (
+                    SELECT jsonb_build_object(
+                        'type', 'Feature',
+                        'geometry', ST_AsGeoJSON(ST_Transform(way, )" + std::to_string(srid_out) + R"())::jsonb,
+                        'properties', jsonb_strip_nulls(to_jsonb(properties) - 'way')
+                    ) AS feature
+                    FROM (
+                        SELECT *
+                        FROM )" + table + R"(
+                        WHERE )" + table + R"(.way && ST_Transform(
+                            ST_MakeEnvelope()" + bboxToQueryString(bbox) + ", " + std::to_string(srid_out) + "), " + std::to_string(srid_in) + R"()
+                        )
+                    ) AS properties
+                ) AS features
+                LIMIT 10000;
+            )";
         }
 
         static std::string bboxToQueryString(const bbox_s& bbox)
