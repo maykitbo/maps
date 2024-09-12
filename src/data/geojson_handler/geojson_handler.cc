@@ -31,7 +31,7 @@ std::string GeoJson::toString() const {
 
 
 GeoJson::Feature::Feature(const data_t& data)
-    : data_(data) {}
+    : data_(data), properties_(data_["properties"]) {}
 
 
 void GeoJson::Feature::geomWay(const std::function<void(point_s)>& func) const
@@ -62,7 +62,7 @@ std::string GeoJson::Feature::toString() const {
 
 std::string GeoJson::Feature::propertiesToString() const
 {
-    return data_["properties"].dump(2);
+    return properties_.dump(2);
 }
 
 
@@ -74,14 +74,75 @@ const GeoJson::data_t& GeoJson::Feature::getJsonData() const
 
 bool GeoJson::Feature::isBuilding() const
 {
-    return data_["properties"].contains("building");
+    return properties_.contains("building");
 }
 
 
-bool GeoJson::Feature::isApartment() const
+bool GeoJson::Feature::isConstruction() const
 {
-    return data_["properties"]["building"] == "apartments";
+    return properties_.contains("construction");
 }
+
+
+std::string GeoJson::Feature::buildingType() const
+{
+    if (properties_.contains("disused") && properties_["disused"] == "yes")
+    {
+        return "disused";
+    }
+    if (properties_.contains("construction") && properties_.contains("amenity"))
+    {
+        std::cout << "CONSTRUCTION + AMENITY in " << propertiesToString() << '\n';
+    }
+    if (properties_.contains("building"))
+    {
+        std::string building_type = properties_["building"];
+        if (building_type == "yes")
+        {
+            if (properties_.contains("construction"))
+            {
+                return properties_["construction"];
+            }
+            else if (properties_.contains("amenity"))
+            {
+                return properties_["amenity"];
+            }
+        }
+        else if (building_type == "construction")
+        {
+            if (!properties_.contains("construction"))
+            {
+                std::cout << "CONSTRUCTION ERROR in " << propertiesToString() << '\n';
+            }
+            else
+            {
+                return properties_["construction"];
+            }
+        }
+        return building_type;
+    }
+    return " ";
+}
+
+
+// bool GeoJson::Feature::isApartment() const
+// {
+//     return data_["properties"]["building"] == "apartments";
+// }
+
+
+bool GeoJson::Feature::isHighway() const
+{
+    return data_["properties"].contains("highway");
+}
+
+
+std::string GeoJson::Feature::highwayType() const
+{
+    return data_["properties"]["highway"];
+}
+
+
 
 
 

@@ -130,12 +130,17 @@ public:
 
     const data_t& getJsonData() const;
     bool isBuilding() const;
-    bool isApartment() const;
+    std::string buildingType() const;
+    bool isConstruction() const;
+    // bool isApartment() const;
+    bool isHighway() const;
+    std::string highwayType() const;
     // bool isNatural() const;
     // bool isWood() const;
 
 private:
     const data_t& data_;
+    const data_t& properties_;
 };
 
 
