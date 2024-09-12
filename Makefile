@@ -1,5 +1,5 @@
 # Number of parallel jobs for make
-MAKE_FLAGS=-j4
+MAKE_FLAGS=#-j4
 
 # Database library build settings
 DB_LIB_BUILD_PATH=build/db_lib
