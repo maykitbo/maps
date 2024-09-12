@@ -56,17 +56,6 @@ struct point_s {
  * Represents a bounding box (rectangular area) on a map.
  */
 struct bbox_s {
-    // /**
-    //  * Top-left corner of the bounding box.
-    //  */
-    // point_s left_top;
-
-    // /**
-    //  * Bottom-right corner of the bounding box.
-    //  */
-    // point_s right_buttom;
-
-
     coord_t max_lat;
     coord_t min_lat;
     coord_t max_lon;
@@ -80,27 +69,9 @@ struct bbox_s {
         os << "min_lon = " << b.min_lon << '\n';
         return os;
     }
-
-    /**
-     * Constructs a bounding box with the given coordinates.
-     *
-     * @param left   Longitude of the left edge.
-     * @param top    Latitude of the top edge.
-     * @param right  Longitude of the right edge.
-     * @param buttom Latitude of the bottom edge.
-     */
     bbox_s(coord_t top, coord_t buttom, coord_t right, coord_t left)
         : max_lat(top), min_lat(buttom), max_lon(right), min_lon(left) {}
     bbox_s() = default;
-
-    // /**
-    //  * Constructs a bounding box with the given top-left and bottom-right points.
-    //  *
-    //  * @param left_top      Top-left corner of the bounding box.
-    //  * @param right_buttom  Bottom-right corner of the bounding box.
-    //  */
-    // bbox_s(const point_s& left_top, const point_s& right_buttom)
-    //     : left_top(left_top), right_buttom(right_buttom) {}
 };
 
 /**
