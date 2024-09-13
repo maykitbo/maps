@@ -147,6 +147,37 @@ class PostGisQuery
                 std::to_string(bbox.max_lat);
         }
 
+        static std::string bboxAreaDraw(const std::string& table,
+                                        const bbox_s& bbox,
+                                        d_area_s darea,
+                                        int srid_out,
+                                        int srid_in)
+        {
+            return
+                "SELECT"
+                    " osm_id,"
+                    // " ST_Transform("
+                    //     "way, " +
+                    //     std::to_string(srid_out) +
+                    // "),"
+                    "ST_AsText(ST_Transform(way, " + 
+                        std::to_string(srid_out) +
+                    ")) AS way_wkt,"
+                    " draw_type"
+                " FROM " + table +
+                " WHERE " +
+                    table + ".way && ST_Transform("
+                        "ST_MakeEnvelope(" +
+                            bboxToQueryString(bbox) + ", " +
+                            std::to_string(srid_out) +
+                        "), " +
+                        std::to_string(srid_in) +
+                    ")"
+                    " AND way_area > " + std::to_string(darea.min) +
+                    " AND way_area < " + std::to_string(darea.max) +
+                    " AND draw_type >= 0"
+                " LIMIT 10000;";
+        }
 };
 
     // std::string query_1 = R"(

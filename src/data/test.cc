@@ -131,16 +131,19 @@ int main()
 
     IData db;
 
-    // auto R = db.fetchPolygons(bbox_s{55.816, 55.81, 37.667, 37.655});
-    auto r = db.getConnector().executeNonTransactionalQuery(
-        "SELECT building, draw_type FROM planet_osm_polygon WHERE building IS NOT NULL LIMIT 1000"
-    );
-    std::cout << r.size() << "\n\n";
+    // // auto R = db.fetchPolygons(bbox_s{55.816, 55.81, 37.667, 37.655});
+    // auto r = db.getConnector().executeNonTransactionalQuery(
+    //     "SELECT building, draw_type FROM planet_osm_polygon WHERE building IS NOT NULL LIMIT 1000"
+    // );
+    // std::cout << r.size() << "\n\n";
 
+    auto r = db.fetchPolygonDraw(bbox_s{55.816, 55.81, 37.667, 37.655}, d_area_s{0, 10000});
+    std::cout << r.size() << '\n';
     for (auto i : r)
     {
         std::cout << i[0].c_str() << " | ";
-        std::cout << i[1].c_str() << "\n";
+        std::cout << i[1].c_str() << " | ";
+        std::cout << i[2].c_str() << "\n";
     }
 
     // std::unordered_set<std::string> unknown;

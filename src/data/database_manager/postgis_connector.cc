@@ -159,3 +159,28 @@ nlohmann::json PostGISConnector::fetchGeoJsonByBBOX(const std::string& table,
 }
 
 
+pqxx::result PostGISConnector::fetchDraw(const std::string& table,
+                            const bbox_s& bbox,
+                            d_area_s darea,
+                            int srid_out) const
+{
+     pqxx::result R = executeNonTransactionalQuery(
+        PostGisQuery::bboxAreaDraw(table, bbox, darea, srid_out, srid_));
+    std::cout << PostGisQuery::bboxAreaDraw(table, bbox, darea, srid_out, srid_) << '\n';
+    if (R.empty())
+    {
+        LOG << WARNING << "No data fund" << LOG;
+        return pqxx::result{};
+    }
+
+    LOG << MESSAGE <<
+        "GeoJSON data for drawing fetched successfully for " << table <<
+        " with bbox = " << PostGisQuery::bboxToQueryString(bbox) <<
+        " with area.min = " << darea.min <<
+        " | dare.max = " << darea.max <<
+    LOG;
+
+    return R;
+}
+
+

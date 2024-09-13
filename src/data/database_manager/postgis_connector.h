@@ -38,6 +38,11 @@ class PostGISConnector
                             int srid_out = 4326) const;
         void listColumns(const std::string& table) const;
 
+        pqxx::result fetchDraw(const std::string& table,
+                                    const bbox_s& bbox,
+                                    d_area_s darea,
+                                    int srid_out = 4326) const;
+
         int getSRID() const { return srid_; }
 
     protected:
@@ -47,7 +52,7 @@ class PostGISConnector
         mutable int srid_ = 3857;
 
         void handleException(const std::exception& e) const;
-        void disconnect();
+        // void disconnect();
 
 
         int sridCheck(const std::string& table) const;

@@ -23,7 +23,7 @@ class IData
         GeoJson fetchPolygons(const bbox_s& bbox, d_area_s darea, bool cache = true, int srid = 4326) const;
         GeoJson fetchLines(const bbox_s& bbox, bool cache = true, int srid = 4326) const;
 
-        pqxx::result fetchPolyDraw(const bbox_s& bbox, d_area_s darea) const;
+        pqxx::result fetchPolygonDraw(const bbox_s& bbox, d_area_s darea) const;
 
         const PostGISConnector& getConnector() const { return pgc_; }
 

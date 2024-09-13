@@ -44,7 +44,13 @@ GeoJson IData::fetchPolygons(const bbox_s& bbox, d_area_s darea, bool cache, int
 {
     // return GeoJson(std::move(pgc_.fetchGeoJsonByBBOX("planet_osm_polygon", bbox, srid)));
     return fetch("planet_osm_polygon", bbox, darea, srid);
-}                            
+}           
+
+
+pqxx::result IData::fetchPolygonDraw(const bbox_s& bbox, d_area_s darea) const
+{
+    return pgc_.fetchDraw("planet_osm_polygon", bbox, darea);
+}
 
 
 void IData::listColumns(const std::string& table) const
