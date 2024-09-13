@@ -78,10 +78,10 @@ bool GeoJson::Feature::isBuilding() const
 }
 
 
-bool GeoJson::Feature::isConstruction() const
-{
-    return properties_.contains("construction");
-}
+// bool GeoJson::Feature::isConstruction() const
+// {
+//     return properties_.contains("construction");
+// }
 
 
 std::string GeoJson::Feature::buildingType() const
@@ -90,38 +90,20 @@ std::string GeoJson::Feature::buildingType() const
     {
         return "disused";
     }
-    if (properties_.contains("construction") && properties_.contains("amenity"))
+
+    std::string building_type = properties_["building"];
+    if (building_type == "yes")
     {
-        std::cout << "CONSTRUCTION + AMENITY in " << propertiesToString() << '\n';
-    }
-    if (properties_.contains("building"))
-    {
-        std::string building_type = properties_["building"];
-        if (building_type == "yes")
+        if (properties_.contains("construction"))
         {
-            if (properties_.contains("construction"))
-            {
-                return properties_["construction"];
-            }
-            else if (properties_.contains("amenity"))
-            {
-                return properties_["amenity"];
-            }
+            return "construction";
         }
-        else if (building_type == "construction")
+        else if (properties_.contains("amenity"))
         {
-            if (!properties_.contains("construction"))
-            {
-                std::cout << "CONSTRUCTION ERROR in " << propertiesToString() << '\n';
-            }
-            else
-            {
-                return properties_["construction"];
-            }
+            return properties_["amenity"];
         }
-        return building_type;
     }
-    return " ";
+    return building_type;
 }
 
 
@@ -141,6 +123,58 @@ std::string GeoJson::Feature::highwayType() const
 {
     return data_["properties"]["highway"];
 }
+
+
+bool GeoJson::Feature::isNatural() const
+{
+    return data_["properties"].contains("natural");
+}
+
+
+bool GeoJson::Feature::isLeisure() const
+{
+    return data_["properties"].contains("leisure");
+}
+
+
+bool GeoJson::Feature::isLanduse() const
+{
+    return data_["properties"].contains("landuse");
+}
+
+
+bool GeoJson::Feature::isAmenity() const
+{
+    return data_["properties"].contains("amenity");
+}
+
+
+bool GeoJson::Feature::isConstruction() const
+{
+    return data_["properties"].contains("construction");
+}
+
+
+bool GeoJson::Feature::isDisused() const
+{
+    return data_["properties"].contains("disused");
+}
+
+
+std::string GeoJson::Feature::laisureType() const
+{
+    return data_["properties"]["leisure"];
+}
+
+
+std::string GeoJson::Feature::naturalType() const
+{
+    return data_["properties"]["natural"];
+}
+
+
+
+
 
 
 

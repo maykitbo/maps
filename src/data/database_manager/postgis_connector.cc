@@ -60,6 +60,33 @@ pqxx::result PostGISConnector::executeNonTransactionalQuery(const std::string& q
 }
 
 
+pqxx::result PostGISConnector::executeQuery(const std::string& query) const
+{
+    try
+    {
+        pqxx::connection c(conn_str_);
+        pqxx::work w(c);
+
+        pqxx::result r = w.exec(query);
+        w.commit();
+
+        LOG << MESSAGE << "Query executed successfully" << LOG;
+        return r;
+    }
+    catch (const pqxx::sql_error& e)
+    {
+        LOG << ERROR << "SQL error: " << e.what() << ", Query was: " << e.query() << LOG;
+    }
+    catch (const std::exception& e)
+    {
+        LOG << ERROR << "Error: " << e.what() << LOG;
+        return pqxx::result();;
+    }
+    return pqxx::result();
+}
+
+
+
 void PostGISConnector::listTables() const
 {
     pqxx::result R = executeNonTransactionalQuery(
@@ -83,6 +110,32 @@ void PostGISConnector::listColumns(const std::string& table) const
 
 nlohmann::json PostGISConnector::fetchGeoJsonByBBOX(const std::string& table,
                                                 const bbox_s& bbox,
+                                                d_area_s darea,
+                                                int srid_out) const
+{
+    pqxx::result R = executeNonTransactionalQuery(
+        PostGisQuery::BBOXtoGeoJson(table, bbox, darea, srid_out, srid_));
+
+    if (R.empty())
+    {
+        LOG << WARNING << "No data fund" << LOG;
+        return nlohmann::json::object();
+    }
+
+    LOG <<
+        MESSAGE <<
+        "GeoJSON data fetched successfully for " <<
+        table <<
+        " with bbox = " <<
+        PostGisQuery::bboxToQueryString(bbox) <<
+    LOG;
+
+    return nlohmann::json::parse(std::move(R[0][0].c_str()));
+}
+
+
+nlohmann::json PostGISConnector::fetchGeoJsonByBBOX(const std::string& table,
+                                                const bbox_s& bbox,
                                                 int srid_out) const
 {
     pqxx::result R = executeNonTransactionalQuery(
@@ -94,7 +147,15 @@ nlohmann::json PostGISConnector::fetchGeoJsonByBBOX(const std::string& table,
         return nlohmann::json::object();
     }
 
-    LOG << MESSAGE << "GeoJSON data fetched successfully for " << table << LOG;
+    LOG <<
+        MESSAGE <<
+        "GeoJSON data fetched successfully for " <<
+        table <<
+        " with bbox = " <<
+        PostGisQuery::bboxToQueryString(bbox) <<
+    LOG;
+
     return nlohmann::json::parse(std::move(R[0][0].c_str()));
 }
+
 

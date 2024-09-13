@@ -15,12 +15,15 @@ class IData
     public:
         IData(const std::string &connect_string = Conf::postgis);
 
+        GeoJson fetch(const std::string& table, const bbox_s& bbox, d_area_s darea, int srid = 4326) const;
         GeoJson fetch(const std::string& table, const bbox_s& bbox, int srid = 4326) const;
         // GeoJson fetchWithCache(const std::string& table, const bbox_s& bbox, int srid = 4326) const;
-        GeoJson fetchRoads(const bbox_s& bbox, bool cache = true, int srid = 4326) const;
-        GeoJson fetchPoints(const bbox_s& bbox, bool cache = true, int srid = 4326) const;
-        GeoJson fetchPolygons(const bbox_s& bbox, bool cache = true, int srid = 4326) const;
+        GeoJson fetchRoads(const bbox_s& bbox, d_area_s darea, bool cache = true, int srid = 4326) const;
+        GeoJson fetchPoints(const bbox_s& bbox, d_area_s darea, bool cache = true, int srid = 4326) const;
+        GeoJson fetchPolygons(const bbox_s& bbox, d_area_s darea, bool cache = true, int srid = 4326) const;
         GeoJson fetchLines(const bbox_s& bbox, bool cache = true, int srid = 4326) const;
+
+        pqxx::result fetchPolyDraw(const bbox_s& bbox, d_area_s darea) const;
 
         const PostGISConnector& getConnector() const { return pgc_; }
 

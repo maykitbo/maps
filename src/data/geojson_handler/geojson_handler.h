@@ -129,14 +129,21 @@ public:
     std::string propertiesToString() const;
 
     const data_t& getJsonData() const;
-    bool isBuilding() const;
-    std::string buildingType() const;
-    bool isConstruction() const;
-    // bool isApartment() const;
+    // bool isConstruction() const;
     bool isHighway() const;
     std::string highwayType() const;
-    // bool isNatural() const;
-    // bool isWood() const;
+
+    // polygon
+    bool isBuilding() const;
+    std::string buildingType() const;
+    bool isNatural() const;
+    bool isLeisure() const;
+    bool isLanduse() const;
+    bool isAmenity() const;
+    bool isConstruction() const;
+    bool isDisused() const;
+    std::string laisureType() const;
+    std::string naturalType() const;
 
 private:
     const data_t& data_;

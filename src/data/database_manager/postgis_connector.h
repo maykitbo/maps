@@ -27,10 +27,15 @@ class PostGISConnector
 
         // void connect(const std::string& conn_str);
         pqxx::result executeNonTransactionalQuery(const std::string& query) const;
+        pqxx::result executeQuery(const std::string& query) const;
         void listTables() const;
         nlohmann::json fetchGeoJsonByBBOX(const std::string& table,
                                     const bbox_s& bbox,
+                                    d_area_s darea,
                                     int srid_out = 4326) const;
+        nlohmann::json fetchGeoJsonByBBOX(const std::string& table,
+                            const bbox_s& bbox,
+                            int srid_out = 4326) const;
         void listColumns(const std::string& table) const;
 
         int getSRID() const { return srid_; }
@@ -43,6 +48,7 @@ class PostGISConnector
 
         void handleException(const std::exception& e) const;
         void disconnect();
+
 
         int sridCheck(const std::string& table) const;
         nlohmann::json toNlohman() const;
