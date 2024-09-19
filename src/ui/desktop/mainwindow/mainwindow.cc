@@ -59,6 +59,17 @@ bool MainWindow::keyPress(QKeyEvent* key_event)
             std::cout << "Down pressed\n";
             emit moveDown();
             return true;
+        
+        case Qt::Key_Plus:
+        case Qt::Key_Equal:
+            std::cout << "Plus pressed\n";
+            emit scrollCloser();
+            return true;
+        
+        case Qt::Key_Minus:
+            std::cout << "Minus pressed\n";
+            emit scrollAway();
+            return true;
     }
     return false;
 }
@@ -69,9 +80,6 @@ void MainWindow::connectKeyEvents()
     connect(this,   &MainWindow::moveLeft,
             scene_, &Scene::moveLeft);
 
-    // connect(this,   &MainWindow::moveLeft,
-    //     [&] () { std::cout << "Lambda move left\n"; });
-
     connect(this,   &MainWindow::moveRight,
             scene_, &Scene::moveRight);
 
@@ -80,6 +88,12 @@ void MainWindow::connectKeyEvents()
 
     connect(this,   &MainWindow::moveDown,
             scene_, &Scene::moveDown);
+    
+    connect(this,   &MainWindow::scrollAway,
+        scene_, &Scene::scrollAway);
+    
+    connect(this,   &MainWindow::scrollCloser,
+        scene_, &Scene::scrollCloser);
 }
 
 

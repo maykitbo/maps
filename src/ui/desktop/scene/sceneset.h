@@ -17,17 +17,22 @@ struct SceneSet
     coord_t height;
     coord_t real_width;
     coord_t real_height;
+    coord_t real_area;
     bbox_s bbox;
     coord_t lon_scale;
     coord_t lat_scale;
     coord_t delta_lat;
     coord_t delta_lon;
     QPointF adaptPoint(point_s point) const;
+    QPointF adaptPoint(coord_t lat, coord_t lon) const;
     void setScale();
     void setRect(int width);
     void setBbox(const bbox_s& bbox);
     void move(coord_t x, coord_t y);
+    void scroll(coord_t v);
     std::pair<bbox_s, bbox_s> halfBbox();
+    void setDelta();
+    void calcReals();
 
     friend std::ostream& operator<<(std::ostream& os, const SceneSet& ss)
     {

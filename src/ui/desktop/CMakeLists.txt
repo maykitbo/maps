@@ -18,22 +18,25 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets Concurrent REQUIRED)
 set(DB_LIB_PATH CACHE PATH "Path to the database library")
 set(CORE_LIB_PATH CACHE PATH "Path to the database library")
 
-set(HEADERS
-    mainwindow.h
-    scene/scene.h
-    scene/sceneset.h
-    scene/mapitems.h
-    scene/map_style.h
+set(SCENE_DIR scene)
+set(MAINWINDOW_DIR mainwindow)
+set(STYLE_DIR style)
 
-    
+set(HEADERS
+    ${MAINWINDOW_DIR}/mainwindow.h
+    ${SCENE_DIR}/scene.h
+    ${SCENE_DIR}/sceneset.h
+    ${SCENE_DIR}/mapitems.h
+    ${STYLE_DIR}/map_style.h
+    ${STYLE_DIR}/lod.h
 )
 
 set(SOURCES
     main.cc
-    mainwindow.cc
-    scene/scene.cc
-    scene/sceneset.cc
-    scene/mapitems.cc
+    ${MAINWINDOW_DIR}/mainwindow.cc
+    ${SCENE_DIR}/scene.cc
+    ${SCENE_DIR}/sceneset.cc
+    ${SCENE_DIR}/mapitems.cc
 )
 
 set(UI
@@ -54,6 +57,12 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Concurrent
     database_lib
     core_lib
+)
+
+target_include_directories(${PROJECT_NAME} PUBLIC 
+    ${SCENE_DIR}
+    ${MAINWINDOW_DIR}
+    ${STYLE_DIR}
 )
 
 if(QT_VERSION_MAJOR EQUAL 6)

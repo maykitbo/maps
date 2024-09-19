@@ -11,6 +11,8 @@
 #include "sceneset.h"
 #include "mapitems.h"
 #include "map_style.h"
+#include "lod.h"
+#include "draw_polygon_data.h"
 
 #include "time_test.h"
 
@@ -36,19 +38,49 @@ class Scene : public QGraphicsScene
         void scrollAway();
     
     protected:
-        SceneSet set_;
-        MapStyle style_;
+        friend class QPointFPreprocess;
+        inline static SceneSet set_;
+        inline static MapStyle style_;
+
         const IData& data_;
 
         void drawMap();
         void drawMap2();
 
-        void move(int x, int y);
+        void move(coord_t x, coord_t y);
+        void scroll(coord_t v);
 
         template<class Item>
         void drawItems(const GeoJson& osm);
 
+        template<class Item, class Func>
+        QFuture<void> fetchDraw(const Func &func);
+
 };
+
+
+struct QPointFPreprocess
+{
+    static QPointF act(double lat, double lon)
+    {
+        return Scene::set_.adaptPoint(lat, lon);
+    }
+};
+
+
+template<class Item, class Func>
+QFuture<void> Scene::fetchDraw(const Func &func)
+{
+    return QtConcurrent::run([&]() {
+        GeoJson polygons = func();
+        QMetaObject::invokeMethod(this,
+            [&, p = std::move(polygons)]()
+            {
+                drawItems<Item>(p);
+            },
+            Qt::QueuedConnection);
+    });
+}
 
 
 template<class Item>

@@ -36,8 +36,25 @@ class PolygonItem : public MapItem
 {
     using MapItem::MapItem;
     public:
+        // PolygonItem()
         bool paint() override;
+    private:
+        bool findBrush(const MapStyle::brush_map& map,
+                      const std::string& key);
 };
+
+
+// class PolygonItem : public QGraphicsPolygonItem
+// {
+//     // using MapItem::MapItem;
+//     public:
+//         PolygonItem();
+        
+//         // bool paint() override;
+//     private:
+//         // bool findBrush(const MapStyle::brush_map& map,
+//         //               const std::string& key);
+// };
 
 
 class RoadItem : public MapItem

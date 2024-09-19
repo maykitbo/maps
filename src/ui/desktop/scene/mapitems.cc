@@ -23,30 +23,51 @@ void MapItem::draw()
 }
 
 
-bool PolygonItem::paint()
+bool PolygonItem::findBrush(const MapStyle::brush_map& map,
+                            const std::string& key)
 {
-    if (feature_.isBuilding())
+    auto brush = map.find(key);
+    if (brush != map.end())
     {
-        auto b_type = style_.buildings.find(feature_.buildingType());
-        if (b_type != style_.buildings.end())
-        {
-            setBrush(b_type->second);
-            return true;
-        }
-        else
-        {
-            std::cout << "NOT INT THE MAP " << feature_.propertiesToString() << "\n";
-        }
+        setBrush(brush->second);
+        return true;
     }
     else
     {
-        if (feature_.isConstruction())
-        {
-            // setBrush(QBrush{QColor{255, 0, 0}});
-            // std::cout << "CONSTRUCTION BUT NOT BUILDING in " << feature_.propertiesToString() << '\n';
-            // return true;
-        }
+        std::cout << "NOT INT THE MAP " << feature_.propertiesToString() << "\n";
     }
+    return false;
+}
+
+
+bool PolygonItem::paint()
+{
+    // if (feature_.isBuilding())
+    // {
+    //     return findBrush(style_.buildings, feature_.buildingType());
+    // }
+    // else if (feature_.isConstruction())
+    // {
+    //     setBrush(style_.areas.find("construction")->second);
+    //     return true;
+    // }
+    // else if (feature_.isDisused())
+    // {
+    //     setBrush(style_.areas.find("disused")->second);
+    //     return true;
+    // }
+    // else if (feature_.isLeisure())
+    // {
+    //     return findBrush(style_.areas, feature_.laisureType());
+    // }
+    // else if (feature_.isNatural())
+    // {
+    //     return findBrush(style_.areas, feature_.naturalType());
+    // }
+    // else
+    // {
+    //     // std::cout << feature_.propertiesToString() << '\n';
+    // }
     return false;
 }
 
@@ -71,7 +92,7 @@ bool LineItem::paint()
         else
         {
             std::cout << "Unknown line.highway type: " <<
-                         feature_.getJsonData()["properties"]["highway"] << '\n';
+                         feature_.propertiesToString() << '\n';
         }
     }
     else

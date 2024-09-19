@@ -5,7 +5,7 @@
 #include <QGraphicsView>
 #include <QKeyEvent>
 
-#include "scene/scene.h"
+#include "scene.h"
 
 
 namespace maykitbo::maps
@@ -33,6 +33,8 @@ class MainWindow : public QMainWindow
         void moveRight();
         void moveUp();
         void moveDown();
+        void scrollCloser();
+        void scrollAway();
     
     protected:
         bool eventFilter(QObject *object, QEvent *event);
