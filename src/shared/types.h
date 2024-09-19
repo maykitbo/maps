@@ -21,10 +21,10 @@ typedef double coord_t;
 // typedef long long int distance_t;
 
 /**
- * @typedef nodeid_t
+ * @typedef idx_t
  * Integer type for representing node IDs.
  */
-typedef long long unsigned nodeid_t;
+typedef long long int idx_t;
 
 /**
  * @struct point_s
@@ -49,6 +49,14 @@ struct point_s {
      */
     point_s(coord_t lat, coord_t lon)
         : lat(lat), lon(lon) {}
+};
+
+
+struct d_area_s
+{
+    coord_t min;
+    coord_t max;
+    d_area_s(coord_t min, coord_t max) : min(min), max(max) {}
 };
 
 /**
@@ -88,12 +96,12 @@ struct route_s {
     /**
      * List of node IDs that define the route.
      */
-    std::vector<nodeid_t> node_ids;
+    std::vector<idx_t> node_ids;
 
     /**
      * List of way IDs that connect the nodes in the route.
      */
-    std::vector<nodeid_t> way_ids;
+    std::vector<idx_t> way_ids;
 };
 
 
