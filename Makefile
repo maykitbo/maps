@@ -5,10 +5,13 @@ MAKE_FLAGS=#-j4
 DB_LIB_BUILD_PATH=build/db_lib
 DB_LIB_PATH=src/data
 # Database tests
-DB_TEST_EXEC=test_database_lib
-DB_TEST_CMAKE_FLAG=DBUILD_TESTS
+DB_TEST_EXEC=data_test
+DB_TEST_CMAKE_FLAG=BUILD_TESTS
+DATA_WKB_TEST=WKB_TEST
+DATA_TEMP_TEST=TEMP_TEST
+
 # Tune database
-TUNE_DB_CMAKE_FLAG=DTUNE_DATABASE
+TUNE_DB_CMAKE_FLAG=TUNE_DATABASE
 TUNE_DB_EXEC=tune_database
 
 
@@ -21,17 +24,25 @@ DESKTOP_CMAKE_DIR=src/ui/desktop
 DESKTOP_EXEC=maykitbo_maps
 
 
-# Target to build and run database library tests
-data_manager_test:
-	@echo "Building and running database library tests..."
-	cmake -S $(DB_LIB_PATH) -B $(DB_LIB_BUILD_PATH) -$(DB_TEST_CMAKE_FLAG)=ON
+# Generic test target
+define RUN_TEST
+	rm -rf $(DB_LIB_BUILD_PATH)
+	cmake -S $(DB_LIB_PATH) -B $(DB_LIB_BUILD_PATH) -D$(DB_TEST_CMAKE_FLAG)=ON -DTEST_FLAG=$1
 	$(MAKE) -C $(DB_LIB_BUILD_PATH) $(MAKE_FLAGS)
 	./$(DB_LIB_BUILD_PATH)/$(DB_TEST_EXEC)
+endef
+
+
+data_wkb_test:
+	$(call RUN_TEST, $(DATA_WKB_TEST))
+
+data_temp_test:
+	$(call RUN_TEST, $(DATA_TEMP_TEST))
 
 # Target to build and run database tune
 tune_database:
 	@echo "Building and running database tune..."
-	cmake -S $(DB_LIB_PATH) -B $(DB_LIB_BUILD_PATH) -$(TUNE_DB_CMAKE_FLAG)=ON
+	cmake -S $(DB_LIB_PATH) -B $(DB_LIB_BUILD_PATH) -D$(TUNE_DB_CMAKE_FLAG)=ON
 	$(MAKE) -C $(DB_LIB_BUILD_PATH) $(MAKE_FLAGS)
 	./$(DB_LIB_BUILD_PATH)/$(TUNE_DB_EXEC)
 
