@@ -5,9 +5,12 @@ using namespace maykitbo::maps;
 
 
 PostGISConnector::PostGISConnector(const std::string& conn_str)
-    : conn_str_(conn_str)
-{
+    : conn_str_(conn_str) {}
 
+
+PostGISConnector::~PostGISConnector()
+{
+    LOG << MESSAGE << "close" << LOG;
 }
 
 
@@ -17,37 +20,32 @@ void PostGISConnector::handleException(const std::exception& e) const
 }
 
 
-PostGISConnector::~PostGISConnector()
-{
-    LOG << MESSAGE << "close" << LOG;
-}
-
-
-int PostGISConnector::sridCheck(const std::string& table) const
-{
-    auto result = executeNonTransactionalQuery(
-        PostGisQuery::sridCheck(table));
-    if (result.empty()) {
-        LOG << ERROR << "Failed to retrieve SRID from the table." << LOG;
-        return -1;
-    }
-    return result[0][0].as<int>();
-}
-
-
-pqxx::result PostGISConnector::executeNonTransactionalQuery(const std::string& query) const
+pqxx::connection* PostGISConnector::connect()
 {
     try
     {
-        // Use thread_local to ensure each thread has its own connection
-        static thread_local std::unique_ptr<pqxx::connection> c;
+        static thread_local std::unique_ptr<pqxx::connection> C;
 
         // Initialize the connection if it hasn't been created yet
-        if (!c) {
-            c = std::make_unique<pqxx::connection>(conn_str_);
+        if (!C) {
+            C = std::make_unique<pqxx::connection>(conn_str_);
             LOG << MESSAGE << "Opened database connection in thread: " << std::this_thread::get_id() << LOG;
         }
-        pqxx::nontransaction N(*c);
+        return C.get();
+    }
+    catch (const std::exception &e)
+    {
+        LOG << ERROR << "cathed error: " << e.what() << LOG;
+    }
+    return nullptr;
+}
+
+
+pqxx::result PostGISConnector::executeNonTransactionalQuery(const std::string& query)
+{
+    try
+    {
+        pqxx::nontransaction N(*connect());
         pqxx::result R = N.exec(query);
         LOG << MESSAGE << "Query executed successfully" << LOG;
         return R;
@@ -60,22 +58,15 @@ pqxx::result PostGISConnector::executeNonTransactionalQuery(const std::string& q
 }
 
 
-pqxx::result PostGISConnector::executeQuery(const std::string& query) const
+pqxx::result PostGISConnector::executeQuery(const std::string& query)
 {
     try
     {
-        pqxx::connection c(conn_str_);
-        pqxx::work w(c);
-
-        pqxx::result r = w.exec(query);
-        w.commit();
-
+        pqxx::work W(*connect());
+        pqxx::result r = W.exec(query);
+        W.commit();
         LOG << MESSAGE << "Query executed successfully" << LOG;
         return r;
-    }
-    catch (const pqxx::sql_error& e)
-    {
-        LOG << ERROR << "SQL error: " << e.what() << ", Query was: " << e.query() << LOG;
     }
     catch (const std::exception& e)
     {
@@ -86,8 +77,25 @@ pqxx::result PostGISConnector::executeQuery(const std::string& query) const
 }
 
 
+int PostGISConnector::sridCheck(const std::string& table)
+{
+    auto result = executeNonTransactionalQuery(
+        PostGisQuery::sridCheck(table));
 
-void PostGISConnector::listTables() const
+    if (result.empty())
+    {
+        LOG << ERROR << "Failed to retrieve SRID from the table." << LOG;
+        return -1;
+    }
+    else if (result[0][0].as<int>() != DBStruct::SRID)
+    {
+        LOG << WARNING << "Srid in the table does not math expected srid." << LOG;
+    }
+    return result[0][0].as<int>();
+}
+
+
+void PostGISConnector::listTables()
 {
     pqxx::result R = executeNonTransactionalQuery(
         PostGisQuery::listTables());
@@ -98,7 +106,7 @@ void PostGISConnector::listTables() const
 }
 
 
-void PostGISConnector::listColumns(const std::string& table) const
+void PostGISConnector::listColumns(const std::string& table)
 {
     pqxx::result R = executeNonTransactionalQuery(
         PostGisQuery::listColumns(table));
@@ -108,65 +116,65 @@ void PostGISConnector::listColumns(const std::string& table) const
         std::cout << '\t' << i << ": " << R[i][0].c_str() << '\n';
 }
 
-nlohmann::json PostGISConnector::fetchGeoJsonByBBOX(const std::string& table,
-                                                const bbox_s& bbox,
-                                                d_area_s darea,
-                                                int srid_out) const
-{
-    pqxx::result R = executeNonTransactionalQuery(
-        PostGisQuery::BBOXtoGeoJson(table, bbox, darea, srid_out, srid_));
+// nlohmann::json PostGISConnector::fetchGeoJsonByBBOX(const std::string& table,
+//                                                 const bbox_s& bbox,
+//                                                 d_area_s darea,
+//                                                 int srid_out) const
+// {
+//     pqxx::result R = executeNonTransactionalQuery(
+//         PostGisQuery::BBOXtoGeoJson(table, bbox, darea, srid_out));
 
-    if (R.empty())
-    {
-        LOG << WARNING << "No data fund" << LOG;
-        return nlohmann::json::object();
-    }
+//     if (R.empty())
+//     {
+//         LOG << WARNING << "No data fund" << LOG;
+//         return nlohmann::json::object();
+//     }
 
-    LOG <<
-        MESSAGE <<
-        "GeoJSON data fetched successfully for " <<
-        table <<
-        " with bbox = " <<
-        PostGisQuery::bboxToQueryString(bbox) <<
-    LOG;
+//     LOG <<
+//         MESSAGE <<
+//         "GeoJSON data fetched successfully for " <<
+//         table <<
+//         " with bbox = " <<
+//         PostGisQuery::bboxToQueryString(bbox) <<
+//     LOG;
 
-    return nlohmann::json::parse(std::move(R[0][0].c_str()));
-}
+//     return nlohmann::json::parse(std::move(R[0][0].c_str()));
+// }
 
 
-nlohmann::json PostGISConnector::fetchGeoJsonByBBOX(const std::string& table,
-                                                const bbox_s& bbox,
-                                                int srid_out) const
-{
-    pqxx::result R = executeNonTransactionalQuery(
-        PostGisQuery::BBOXtoGeoJson(table, bbox, srid_out, srid_));
+// nlohmann::json PostGISConnector::fetchGeoJsonByBBOX(const std::string& table,
+//                                                 const bbox_s& bbox,
+//                                                 int srid_out) const
+// {
+//     pqxx::result R = executeNonTransactionalQuery(
+//         PostGisQuery::BBOXtoGeoJson(table, bbox, srid_out, srid_));
 
-    if (R.empty())
-    {
-        LOG << WARNING << "No data fund" << LOG;
-        return nlohmann::json::object();
-    }
+//     if (R.empty())
+//     {
+//         LOG << WARNING << "No data fund" << LOG;
+//         return nlohmann::json::object();
+//     }
 
-    LOG <<
-        MESSAGE <<
-        "GeoJSON data fetched successfully for " <<
-        table <<
-        " with bbox = " <<
-        PostGisQuery::bboxToQueryString(bbox) <<
-    LOG;
+//     LOG <<
+//         MESSAGE <<
+//         "GeoJSON data fetched successfully for " <<
+//         table <<
+//         " with bbox = " <<
+//         PostGisQuery::bboxToQueryString(bbox) <<
+//     LOG;
 
-    return nlohmann::json::parse(std::move(R[0][0].c_str()));
-}
+//     return nlohmann::json::parse(std::move(R[0][0].c_str()));
+// }
 
 
 pqxx::result PostGISConnector::fetchDraw(const std::string& table,
-                            const bbox_s& bbox,
-                            d_area_s darea,
-                            int srid_out) const
+                                        const bbox_s& bbox,
+                                        d_area_s darea,
+                                        int srid_out)
 {
-     pqxx::result R = executeNonTransactionalQuery(
-        PostGisQuery::bboxAreaDraw(table, bbox, darea, srid_out, srid_));
-    std::cout << PostGisQuery::bboxAreaDraw(table, bbox, darea, srid_out, srid_) << '\n';
+    pqxx::result R = executeNonTransactionalQuery(
+        PostGisQuery::bboxAreaDraw(table, bbox, darea, srid_out));
+    // std::cout << PostGisQuery::bboxAreaDraw(table, bbox, darea, srid_out, srid_) << '\n';
     if (R.empty())
     {
         LOG << WARNING << "No data fund" << LOG;
