@@ -122,34 +122,62 @@ class PostGisQuery
                 std::to_string(bbox.max_lat);
         }
 
-        static std::string bboxAreaDraw(const std::string& table,
-                                        const bbox_s& bbox,
-                                        d_area_s darea,
-                                        int srid_out)
+        static std::string bboxMinDrawType(const std::string& table,
+                                const bbox_s& bbox,
+                                int min_draw_type,
+                                int limit)
         {
             return
                 "SELECT " + 
                     DBDT::ID_COL + ", "
-                    "ST_Transform(" + DBDT::WAY_COL + ", " + 
-                        std::to_string(srid_out) +
-                    ") AS "+ DBDT::WAY_WKB_COL + ", " +
-                    // "ST_AsText(ST_Transform(way, " + 
-                    //     std::to_string(srid_out) +
-                    // ")),"
+                    // "ST_Transform(" + DBDT::WAY_COL + ", " + 
+                    //     std::to_string(DBDT::SRID_OUT) +
+                    // ") AS "+ DBDT::WAY_WKB_COL + ", " +
+                    "ST_AsText(ST_Transform(way, " + 
+                        std::to_string(DBDT::SRID_OUT) +
+                    ")) AS " + DBDT::TEXT_WAY_COL + ", " + 
                     DBDT::DRAW_TYPE_COL +
                 " FROM " + table +
                 " WHERE " +
                     table + "." + DBDT::WAY_COL + " && ST_Transform("
                         "ST_MakeEnvelope(" +
                             bboxToQueryString(bbox) + ", " +
-                            std::to_string(srid_out) +
+                            std::to_string(DBDT::SRID_OUT) +
                         "), " +
-                        std::to_string(DBDT::SRID) +
+                        std::to_string(DBDT::SRID_IN) +
+                    ")"
+                    " AND " + DBDT::DRAW_TYPE_COL + " >= " + std::to_string(min_draw_type) +
+                " LIMIT " + std::to_string(limit) + ";";
+        }
+
+        static std::string bboxDarea(const std::string& table,
+                                        const bbox_s& bbox,
+                                        d_area_s darea,
+                                        int limit)
+        {
+            return
+                "SELECT " + 
+                    DBDT::ID_COL + ", "
+                    // "ST_Transform(" + DBDT::WAY_COL + ", " + 
+                    //     std::to_string(DBDT::SRID_OUT) +
+                    // ") AS "+ DBDT::WAY_WKB_COL + ", " +
+                    "ST_AsText(ST_Transform(way, " + 
+                        std::to_string(DBDT::SRID_OUT) +
+                    ")) AS " + DBDT::TEXT_WAY_COL + ", " + 
+                    DBDT::DRAW_TYPE_COL +
+                " FROM " + table +
+                " WHERE " +
+                    table + "." + DBDT::WAY_COL + " && ST_Transform("
+                        "ST_MakeEnvelope(" +
+                            bboxToQueryString(bbox) + ", " +
+                            std::to_string(DBDT::SRID_OUT) +
+                        "), " +
+                        std::to_string(DBDT::SRID_IN) +
                     ")"
                     " AND " + DBDT::WAY_AREA_COL + " > " + std::to_string(darea.min) +
                     " AND " + DBDT::WAY_AREA_COL + " < " + std::to_string(darea.max) +
                     " AND " + DBDT::DRAW_TYPE_COL + " >= 0"
-                " LIMIT " + std::to_string(DBDT::LIMIT) + ";";
+                " LIMIT " + std::to_string(limit) + ";";
 
             // return
             //     "WITH geom_data AS ("

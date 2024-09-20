@@ -42,22 +42,29 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 target_link_libraries(${PROJECT_NAME} PUBLIC -lpqxx -lpq)
 
 
-option(BUILD_TESTS "Build the tests" OFF)
+option(TEST_FLAG "Test define flag" OFF)
 option(TUNE_DATABASE "Build the tune database main" OFF)
 
 
-if(BUILD_TESTS)
+if(TEST_FLAG)
     set(TEST_SOURCES
         ${TEST_DIR}/main.cc
         ${TEST_DIR}/tests.h
         ${SHARED_DIR}/config.h
+        ${SHARED_DIR}/time_test.h
 
         ${TEST_DIR}/wkb/wkb.h
         ${TEST_DIR}/temp_test/temp_test.h
     )
 
-    add_executable(test_database_lib ${TEST_SOURCES})
-    target_link_libraries(test_database_lib PRIVATE ${PROJECT_NAME})
+    add_executable(data_test ${TEST_SOURCES})
+    target_link_libraries(data_test PRIVATE ${PROJECT_NAME})
+
+    message(TEST FLAG = ${TEST_FLAG})
+    # Use the TEST_FLAG variable to define preprocessor definitions
+    if(DEFINED TEST_FLAG)
+        target_compile_definitions(data_test PRIVATE ${TEST_FLAG})
+    endif()
 endif()
 
 
@@ -70,9 +77,4 @@ if(TUNE_DATABASE)
 
     add_executable(tune_database ${TUNE_SOURCES})
     target_link_libraries(tune_database PRIVATE ${PROJECT_NAME})
-
-    # Use the TEST_FLAG variable to define preprocessor definitions
-    if(DEFINED TEST_FLAG)
-        target_compile_definitions(data_test PRIVATE ${TEST_FLAG})
-    endif()
 endif()

@@ -41,10 +41,16 @@ class PostGISConnector
         //                     int srid_out = 4326) const;
         void listColumns(const std::string& table);
 
-        pqxx::result fetchDraw(const std::string& table,
+        pqxx::result fetchBboxDarea(const std::string& table,
                                     const bbox_s& bbox,
                                     d_area_s darea,
-                                    int srid_out = 4326);
+                                    int limit);
+        pqxx::result fetchBboxMinDrawType(const std::string& table,
+                                    const bbox_s& bbox,
+                                    int min_draw_type,
+                                    int limit);
+        
+        int sridCheck(const std::string& table);
 
     protected:
         // static thread_local std::unique_ptr<pqxx::connection> C;
@@ -60,7 +66,6 @@ class PostGISConnector
         // void disconnect();
 
 
-        int sridCheck(const std::string& table);
 };
 
 

@@ -11,14 +11,14 @@ namespace maykitbo::maps
 
 template
 <
-    class way_conteiner,
+    class way_container,
     class coords_preprocess,
     class ItemTypes
 >
 class FeatureSet
 {
     public:
-        using F = Feature<way_conteiner, coords_preprocess, ItemTypes>;
+        using F = Feature<way_container, coords_preprocess, ItemTypes>;
 
         FeatureSet() = default;
 
@@ -37,8 +37,8 @@ class FeatureSet
 
 
 // template
-// <class way_conteiner, class coords_preprocess, class ItemTypes>
-// void FeatureSet<way_conteiner, coords_preprocess, ItemTypes>
+// <class way_container, class coords_preprocess, class ItemTypes>
+// void FeatureSet<way_container, coords_preprocess, ItemTypes>
 // ::fetch(const bbox_s& bbox, d_area_s darea, int srid)
 // {
 //     PostGISConnector pgc;
@@ -49,8 +49,8 @@ class FeatureSet
 
 
 template
-<class way_conteiner, class coords_preprocess, class ItemTypes>
-void FeatureSet<way_conteiner, coords_preprocess, ItemTypes>
+<class way_container, class coords_preprocess, class ItemTypes>
+void FeatureSet<way_container, coords_preprocess, ItemTypes>
 ::parse(const pqxx::result& pqxx_data)
 {
     data_.reserve(pqxx_data.size());
@@ -61,7 +61,8 @@ void FeatureSet<way_conteiner, coords_preprocess, ItemTypes>
         data_.back().parse
         (
             feature[DBStruct::ID_COL].as<idx_t>(),
-            feature[DBStruct::WAY_WKB_COL].c_str(),
+            // feature[DBStruct::WAY_WKB_COL].c_str(),
+            feature[DBStruct::TEXT_WAY_COL].c_str(),
             static_cast<PolygonTypes>(feature[DBStruct::DRAW_TYPE_COL].as<int>())
         );
     }

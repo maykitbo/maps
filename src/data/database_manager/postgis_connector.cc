@@ -87,7 +87,7 @@ int PostGISConnector::sridCheck(const std::string& table)
         LOG << ERROR << "Failed to retrieve SRID from the table." << LOG;
         return -1;
     }
-    else if (result[0][0].as<int>() != DBStruct::SRID)
+    else if (result[0][0].as<int>() != DBStruct::SRID_IN)
     {
         LOG << WARNING << "Srid in the table does not math expected srid." << LOG;
     }
@@ -167,14 +167,13 @@ void PostGISConnector::listColumns(const std::string& table)
 // }
 
 
-pqxx::result PostGISConnector::fetchDraw(const std::string& table,
+pqxx::result PostGISConnector::fetchBboxDarea(const std::string& table,
                                         const bbox_s& bbox,
                                         d_area_s darea,
-                                        int srid_out)
+                                        int limit)
 {
     pqxx::result R = executeNonTransactionalQuery(
-        PostGisQuery::bboxAreaDraw(table, bbox, darea, srid_out));
-    // std::cout << PostGisQuery::bboxAreaDraw(table, bbox, darea, srid_out, srid_) << '\n';
+        PostGisQuery::bboxDarea(table, bbox, darea, limit));
     if (R.empty())
     {
         LOG << WARNING << "No data fund" << LOG;
@@ -182,7 +181,7 @@ pqxx::result PostGISConnector::fetchDraw(const std::string& table,
     }
 
     LOG << MESSAGE <<
-        "GeoJSON data for drawing fetched successfully for " << table <<
+        "PQXX data for drawing fetched successfully for " << table <<
         " with bbox = " << PostGisQuery::bboxToQueryString(bbox) <<
         " with area.min = " << darea.min <<
         " | dare.max = " << darea.max <<
@@ -190,5 +189,29 @@ pqxx::result PostGISConnector::fetchDraw(const std::string& table,
 
     return R;
 }
+
+
+pqxx::result PostGISConnector::fetchBboxMinDrawType(const std::string& table,
+                            const bbox_s& bbox,
+                            int min_draw_type,
+                            int limit)
+{
+    pqxx::result R = executeNonTransactionalQuery(
+        PostGisQuery::bboxMinDrawType(table, bbox, min_draw_type, limit));
+    if (R.empty())
+    {
+        LOG << WARNING << "No data fund" << LOG;
+        return pqxx::result{};
+    }
+
+    LOG << MESSAGE <<
+        "PQXX data for drawing fetched successfully for " << table <<
+        " with bbox = " << PostGisQuery::bboxToQueryString(bbox) <<
+        " with min draw type = " << min_draw_type <<
+    LOG;
+
+    return R;
+}
+
 
 
