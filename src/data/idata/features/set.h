@@ -3,49 +3,40 @@
 
 #include "feature.h"
 #include "pqxx/pqxx"
+#include "database_structure.h"
 
 
 namespace maykitbo::maps
 {
 
 
-template
-<
-    class way_container,
-    class coords_preprocess,
-    class ItemTypes
->
+template<class way_container, class coords_preprocess, class ItemTypes>
 class FeatureSet
 {
-    public:
+    private:
         using F = Feature<way_container, coords_preprocess, ItemTypes>;
+        std::vector<F> data_;
+
+    public:
 
         FeatureSet() = default;
 
-        // void fetch(const bbox_s& bbox, d_area_s darea, int srid = 4326);
-        // void forEach(const std::function<void(const F&)>& func);
         void parse(const pqxx::result& pqxx_data);
 
-        std::vector<F>::const_iterator begin() const
+        typename std::vector<F>::iterator begin()
             { return data_.begin(); }
-        std::vector<F>::const_iterator end() const
+        typename std::vector<F>::iterator end()
             { return data_.end(); }
 
-    private:
-        std::vector<F> data_;
+        typename std::vector<F>::const_iterator begin() const
+            { return data_.cbegin(); }
+        typename std::vector<F>::const_iterator end() const
+            { return data_.cend(); }
+        
+        size_t size() const
+            { return data_.size(); }
 };
 
-
-// template
-// <class way_container, class coords_preprocess, class ItemTypes>
-// void FeatureSet<way_container, coords_preprocess, ItemTypes>
-// ::fetch(const bbox_s& bbox, d_area_s darea, int srid)
-// {
-//     PostGISConnector pgc;
-//     pqxx::result R = pgc.fetchDraw(
-//         DBStruct::POLYGON_TABLE, bbox, darea, srid);
-//     parse(R);
-// }
 
 
 template
@@ -56,14 +47,14 @@ void FeatureSet<way_container, coords_preprocess, ItemTypes>
     data_.reserve(pqxx_data.size());
     for (const pqxx::row& feature : pqxx_data)
     {
-        data_.push_back(Feature{});                
+        data_.push_back(F{});                
     
         data_.back().parse
         (
             feature[DBStruct::ID_COL].as<idx_t>(),
             // feature[DBStruct::WAY_WKB_COL].c_str(),
             feature[DBStruct::TEXT_WAY_COL].c_str(),
-            static_cast<PolygonTypes>(feature[DBStruct::DRAW_TYPE_COL].as<int>())
+            static_cast<ItemTypes>(feature[DBStruct::DRAW_TYPE_COL].as<int>())
         );
     }
     auto i = data_.begin();

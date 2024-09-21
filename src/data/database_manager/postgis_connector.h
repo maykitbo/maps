@@ -29,43 +29,28 @@ class PostGISConnector
         PostGISConnector(const std::string& conn_str);
         ~PostGISConnector();
 
-        pqxx::result executeNonTransactionalQuery(const std::string& query);
-        pqxx::result executeQuery(const std::string& query);
-        void listTables();
-        // nlohmann::json fetchGeoJsonByBBOX(const std::string& table,
-        //                             const bbox_s& bbox,
-        //                             d_area_s darea,
-        //                             int srid_out = 4326) const;
-        // nlohmann::json fetchGeoJsonByBBOX(const std::string& table,
-        //                     const bbox_s& bbox,
-        //                     int srid_out = 4326) const;
-        void listColumns(const std::string& table);
+        pqxx::result executeNonTransactionalQuery(const std::string& query) const;
+        pqxx::result executeQuery(const std::string& query) const;
+        void listTables() const;
+        void listColumns(const std::string& table) const;
 
         pqxx::result fetchBboxDarea(const std::string& table,
                                     const bbox_s& bbox,
                                     d_area_s darea,
-                                    int limit);
+                                    int limit) const;
         pqxx::result fetchBboxMinDrawType(const std::string& table,
                                     const bbox_s& bbox,
                                     int min_draw_type,
-                                    int limit);
+                                    int limit) const;
         
-        int sridCheck(const std::string& table);
+        int sridCheck(const std::string& table) const;
 
     protected:
-        // static thread_local std::unique_ptr<pqxx::connection> C;
-
-        pqxx::connection* connect();
+        pqxx::connection* connect() const;
 
         std::string conn_str_;
-        // pqxx::connection *c_ = nullptr;
-
-        // mutable int srid_ = 3857;
 
         void handleException(const std::exception& e) const;
-        // void disconnect();
-
-
 };
 
 

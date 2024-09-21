@@ -20,7 +20,7 @@ void PostGISConnector::handleException(const std::exception& e) const
 }
 
 
-pqxx::connection* PostGISConnector::connect()
+pqxx::connection* PostGISConnector::connect() const
 {
     try
     {
@@ -41,7 +41,7 @@ pqxx::connection* PostGISConnector::connect()
 }
 
 
-pqxx::result PostGISConnector::executeNonTransactionalQuery(const std::string& query)
+pqxx::result PostGISConnector::executeNonTransactionalQuery(const std::string& query) const
 {
     try
     {
@@ -58,7 +58,7 @@ pqxx::result PostGISConnector::executeNonTransactionalQuery(const std::string& q
 }
 
 
-pqxx::result PostGISConnector::executeQuery(const std::string& query)
+pqxx::result PostGISConnector::executeQuery(const std::string& query) const
 {
     try
     {
@@ -77,7 +77,7 @@ pqxx::result PostGISConnector::executeQuery(const std::string& query)
 }
 
 
-int PostGISConnector::sridCheck(const std::string& table)
+int PostGISConnector::sridCheck(const std::string& table) const
 {
     auto result = executeNonTransactionalQuery(
         PostGisQuery::sridCheck(table));
@@ -95,7 +95,7 @@ int PostGISConnector::sridCheck(const std::string& table)
 }
 
 
-void PostGISConnector::listTables()
+void PostGISConnector::listTables() const
 {
     pqxx::result R = executeNonTransactionalQuery(
         PostGisQuery::listTables());
@@ -106,7 +106,7 @@ void PostGISConnector::listTables()
 }
 
 
-void PostGISConnector::listColumns(const std::string& table)
+void PostGISConnector::listColumns(const std::string& table) const
 {
     pqxx::result R = executeNonTransactionalQuery(
         PostGisQuery::listColumns(table));
@@ -116,61 +116,11 @@ void PostGISConnector::listColumns(const std::string& table)
         std::cout << '\t' << i << ": " << R[i][0].c_str() << '\n';
 }
 
-// nlohmann::json PostGISConnector::fetchGeoJsonByBBOX(const std::string& table,
-//                                                 const bbox_s& bbox,
-//                                                 d_area_s darea,
-//                                                 int srid_out) const
-// {
-//     pqxx::result R = executeNonTransactionalQuery(
-//         PostGisQuery::BBOXtoGeoJson(table, bbox, darea, srid_out));
-
-//     if (R.empty())
-//     {
-//         LOG << WARNING << "No data fund" << LOG;
-//         return nlohmann::json::object();
-//     }
-
-//     LOG <<
-//         MESSAGE <<
-//         "GeoJSON data fetched successfully for " <<
-//         table <<
-//         " with bbox = " <<
-//         PostGisQuery::bboxToQueryString(bbox) <<
-//     LOG;
-
-//     return nlohmann::json::parse(std::move(R[0][0].c_str()));
-// }
-
-
-// nlohmann::json PostGISConnector::fetchGeoJsonByBBOX(const std::string& table,
-//                                                 const bbox_s& bbox,
-//                                                 int srid_out) const
-// {
-//     pqxx::result R = executeNonTransactionalQuery(
-//         PostGisQuery::BBOXtoGeoJson(table, bbox, srid_out, srid_));
-
-//     if (R.empty())
-//     {
-//         LOG << WARNING << "No data fund" << LOG;
-//         return nlohmann::json::object();
-//     }
-
-//     LOG <<
-//         MESSAGE <<
-//         "GeoJSON data fetched successfully for " <<
-//         table <<
-//         " with bbox = " <<
-//         PostGisQuery::bboxToQueryString(bbox) <<
-//     LOG;
-
-//     return nlohmann::json::parse(std::move(R[0][0].c_str()));
-// }
-
 
 pqxx::result PostGISConnector::fetchBboxDarea(const std::string& table,
                                         const bbox_s& bbox,
                                         d_area_s darea,
-                                        int limit)
+                                        int limit) const
 {
     pqxx::result R = executeNonTransactionalQuery(
         PostGisQuery::bboxDarea(table, bbox, darea, limit));
@@ -194,7 +144,7 @@ pqxx::result PostGISConnector::fetchBboxDarea(const std::string& table,
 pqxx::result PostGISConnector::fetchBboxMinDrawType(const std::string& table,
                             const bbox_s& bbox,
                             int min_draw_type,
-                            int limit)
+                            int limit) const
 {
     pqxx::result R = executeNonTransactionalQuery(
         PostGisQuery::bboxMinDrawType(table, bbox, min_draw_type, limit));

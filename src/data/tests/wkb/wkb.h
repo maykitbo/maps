@@ -21,9 +21,9 @@ struct WKB
     using Point = std::pair<double, double>;
     using Set = std::vector<Point>;
 
-    static const int fail_output_range = 10;
+    static const int fail_output_range = 2;
     inline static const bbox_s bbox{55.816, 55.81, 37.667, 37.655};
-    static const int limit_per_table = 10000;
+    static const int limit_per_table = 2;
 
     static pqxx::result getWKBData(const std::string& table)
     {
@@ -34,9 +34,9 @@ struct WKB
                 "ST_Transform(" + DBDT::WAY_COL + ", " + 
                     std::to_string(DBDT::SRID_OUT) +
                 ") AS wkb_way " +
-            " FROM " + DBDT::POLYGON_TABLE +
+            " FROM " + table +
             " WHERE " +
-                DBDT::POLYGON_TABLE + "." + DBDT::WAY_COL + " && ST_Transform("
+                table + "." + DBDT::WAY_COL + " && ST_Transform("
                     "ST_MakeEnvelope(" +
                         PostGisQuery::bboxToQueryString(bbox) + ", " +
                         std::to_string(DBDT::SRID_OUT) +
@@ -56,9 +56,9 @@ struct WKB
                 "ST_AsText(ST_Transform(way, " + 
                     std::to_string(DBDT::SRID_OUT) +
                 ")) AS text_way " + 
-            " FROM " + DBDT::POLYGON_TABLE +
+            " FROM " + table +
             " WHERE " +
-                DBDT::POLYGON_TABLE + "." + DBDT::WAY_COL + " && ST_Transform("
+                table + "." + DBDT::WAY_COL + " && ST_Transform("
                     "ST_MakeEnvelope(" +
                         PostGisQuery::bboxToQueryString(bbox) + ", " +
                         std::to_string(DBDT::SRID_OUT) +
@@ -71,19 +71,24 @@ struct WKB
 
     static Set parseCoordText(const std::string& text_way)
     {
+        std::cout << text_way << '\n';
         std::stringstream ss(text_way);
         Set set;
-        ss.ignore(9);
+        ss.ignore(128, '(');
+        while (ss.peek() == '(')
+            ss.ignore(1);
+
         while (ss && ss.peek() != ')')
         {
             double lat, lon;
             ss >> lon;
             ss >> lat;
+            std::cout << lat << ' ' << lon << '\n';
             set.push_back({lon, lat});
+            if (ss.peek() == ')')
+                break;
             ss.ignore(1);
         }
-        // if (set.back().first == 0 && set.back().second == 0)
-        //     set.resize(set.size() - 1);
         return set;
     }
 
@@ -169,7 +174,7 @@ struct WKB
 
     static void test()
     {
-        test(DBDT::POLYGON_TABLE, 0.001);
+        // test(DBDT::POLYGON_TABLE, 0.001);
         test(DBDT::LINE_TABLE, 0.001);
     }
 };

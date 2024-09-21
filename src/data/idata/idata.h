@@ -5,7 +5,6 @@
 #include "types/polygon.h"
 #include "features/set.h"
 #include "postgis_connector.h"
-// #inc
 
 
 namespace maykitbo::maps
@@ -15,28 +14,25 @@ namespace maykitbo::maps
 class IData
 {
     public:
-        IData(const std::string& conn_str);
+        IData(const std::string& conn_str)
+            : pgc_(conn_str) {}
 
         template<class way_conteiner, class coords_preprocess>
         FeatureSet<way_conteiner, coords_preprocess, PolygonTypes>
-        fethPolygons(const bbox_s& bbox, const d_area_s& darea, int limit = 10000);
+        fethPolygons(const bbox_s& bbox, const d_area_s& darea, int limit = 10000) const;
 
         template<class way_conteiner, class coords_preprocess>
         FeatureSet<way_conteiner, coords_preprocess, LineTypes>
-            fethLines(const bbox_s& bbox, int min_draw_type, int limit = 10000);
+            fethLines(const bbox_s& bbox, int min_draw_type, int limit = 10000) const;
     
     private:
         PostGISConnector pgc_;
 };
 
 
-IData::IData(const std::string& conn_str)
-    : pgc_(conn_str) {}
-
-
 template<class way_conteiner, class coords_preprocess>
 FeatureSet<way_conteiner, coords_preprocess, PolygonTypes>
-IData::fethPolygons(const bbox_s& bbox, const d_area_s& darea, int limit)
+IData::fethPolygons(const bbox_s& bbox, const d_area_s& darea, int limit) const
 {
     pqxx::result R = pgc_.fetchBboxDarea(
         DBStruct::POLYGON_TABLE, bbox, darea, limit);
@@ -49,7 +45,7 @@ IData::fethPolygons(const bbox_s& bbox, const d_area_s& darea, int limit)
 
 template<class way_conteiner, class coords_preprocess>
 FeatureSet<way_conteiner, coords_preprocess, LineTypes>
-IData::fethLines(const bbox_s& bbox, int min_draw_type, int limit)
+IData::fethLines(const bbox_s& bbox, int min_draw_type, int limit) const
 {
     pqxx::result R = pgc_.fetchBboxMinDrawType(
         DBStruct::LINE_TABLE, bbox, min_draw_type, limit);

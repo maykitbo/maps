@@ -69,8 +69,7 @@ std::pair<
 }
 
 
-void realLines(
-    const std::unordered_map<std::string, int>& mapping)
+void realLines(const std::unordered_map<std::string, int>& mapping)
 {
     pqxx::connection c(Conf::postgis);
     pqxx::work w(c);
@@ -126,8 +125,7 @@ void realLines(
 }
 
 
-void realBuildings(
-    const std::unordered_map<std::string, int>& mapping)
+void realBuildings(const std::unordered_map<std::string, int>& mapping)
 {
     pqxx::connection c(Conf::postgis);
     pqxx::work w(c);
@@ -175,6 +173,89 @@ void realBuildings(
     std::cout << "Updated " << updates.size() << " rows.\n";
 }
 
+
+void anamiseHelper(const std::unordered_map<std::string, int>& mapping,
+                   const std::unordered_map<std::string, int>& types,
+                   const std::string& col)
+{
+    pqxx::connection c(Conf::postgis);
+    pqxx::work w(c);
+    pqxx::result R = w.exec(
+        "SELECT osm_id, " + col + " FROM planet_osm_polygon WHERE draw_type < 0 AND " + col + " IS NOT NULL");
+    w.commit();
+
+    std::unordered_set<std::string> set;
+
+    for (const auto& r : R)
+    {
+        if (mapping.find(r[col].c_str()) == mapping.end())
+            set.insert(r[col].c_str());
+    }
+
+    for (const auto& s : set)
+    {
+        std::cout << s << '\n';
+    }
+}
+
+
+void analiseAreas(const std::unordered_map<std::string, int>& mapping,
+                  const std::unordered_map<std::string, int>& types)
+{
+    anamiseHelper(mapping, types, "\"natural\"");
+
+    
+}
+
+
+void realNatural(const std::unordered_map<std::string, int>& mapping)
+{
+    pqxx::connection c(Conf::postgis);
+    pqxx::work w(c);
+    pqxx::result r = w.exec(
+        "SELECT osm_id, \"natural\" FROM planet_osm_polygon WHERE draw_type < 0 AND \"natural\" IS NOT NULL");
+    w.commit();
+
+
+    // Prepare update statement
+    c.prepare("update_draw_type", 
+        "UPDATE planet_osm_polygon SET draw_type = $1 WHERE osm_id = $2");
+
+    // Vector to store updates
+    std::vector<std::pair<int, int>> updates;
+
+    // Process each row
+    for (const auto& row : r)
+    {
+        int id = row["osm_id"].as<int>();
+        std::string natural = row["natural"].as<std::string>();
+
+
+        // Check if building type exists in mapping
+        if (mapping.find(natural) != mapping.end())
+        {
+            int drawType = mapping.find(natural)->second;
+            updates.push_back(std::make_pair(drawType, id));
+        }
+    }
+
+    std::cout << "updates size = " << updates.size() << '\n';
+    long long k = 0;
+    const long long batch = 50000;
+    // Perform batch update
+    for (const auto& update : updates)
+    {
+        if ((++k) % batch == 0)
+        {
+            std::cout << k << '/' << updates.size() << '\n';
+        }
+        w.exec_prepared("update_draw_type", update.first, update.second);
+    }
+
+    w.commit();
+
+    std::cout << "Updated " << updates.size() << " rows.\n";
+}
 
 
 } // namespace maykitbo::maps

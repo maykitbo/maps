@@ -127,13 +127,21 @@ way_conteiner WKBParser<way_conteiner, coords_preprocess>::read(const char* text
 {
     std::stringstream ss(text);
     way_conteiner way;
-    ss.ignore(9);
+
+    ss.ignore(128, '(');
+    // while (ss.peek() != '(')
+    //     ss.ignore(1);
+    while (ss.peek() == '(')
+        ss.ignore(1);
+
     while (ss && ss.peek() != ')')
     {
         double lat, lon;
         ss >> lon;
         ss >> lat;
         way.push_back(coords_preprocess::act(lat, lon));
+        if (ss.peek() == ')')
+            break;
         ss.ignore(1);
     }
 
