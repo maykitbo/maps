@@ -5,7 +5,8 @@
 #include <unordered_map>
 
 #include "types.h"
-#include "polygon_types.h"
+#include "idata/types/polygon.h"
+#include "idata/types/line.h"
 
 
 namespace maykitbo::maps
@@ -28,60 +29,68 @@ struct MapStyle
     const coord_t move_procent = 0.3;
     const coord_t scroll_procent = 0.3;
 
-    const QColor road_color = QColor{155, 128, 32};
-    const QColor foot_way_color = QColor{192, 192, 192};
-    const QColor cycle_color = QColor{10,   220, 10};
-    const std::unordered_map<std::string, QPen> roads =
+    // Define colors suitable for a dark background with the requested adjustments
+    const QColor road_color_main = QColor{170, 170, 100};       // Light yellowish-gray for main roads
+    const QColor road_color_secondary = QColor{140, 140, 80};   // Medium yellowish-gray for secondary roads
+    const QColor foot_way_color = QColor{120, 60, 120};        // Light magenta for footways
+    const QColor cycleway_color = QColor{20, 200, 20};        // Brighter green for cycleways
+    const QColor construction_color = QColor{80, 80,  80};    // Muted orange for construction (unchanged)
+    const QColor abandoned_color = QColor{255, 0,  0};
+
+    // Line styles for different types of ways
+    const std::unordered_map<LineTypes, QPen> lines =
     {
-        {"footway",       {QBrush{       foot_way_color}, 1.4, Qt::DashLine}},
-        {"pedestrian",    {QBrush{       foot_way_color}, 1.6, Qt::DashLine}},
-        {"service",       {QBrush{QColor{128, 128, 128}}, 1}},
-        {"path",          {QBrush{       foot_way_color}, 1,   Qt::DashLine}},
-        {"cycleway",      {QBrush{       cycle_color},   1}},
-        {"bridleway",     {QBrush{       cycle_color},   1.2}},
-        {"steps",         {QBrush{       foot_way_color}, 2}},
-        {"unclassified",  {QBrush{QColor{92,  92,  92}},  1.5}},
-        {"tertiary",      {QBrush{       road_color},     3}},
-        {"tertiary_link", {QBrush{       road_color},     3}},
-        {"residential",   {QBrush{       road_color},     2}},
-        {"living_street", {QBrush{       road_color},     1.5}},
-        {"secondary",     {QBrush{       road_color},     4}},
-        {"secondary_link",{QBrush{       road_color},     4}},
-        {"primary_link",  {QBrush{       road_color},     5}},
-        {"primary",       {QBrush{       road_color},     5}},
-        {"construction",  {QBrush{       road_color},     3,   Qt::DashLine}},
-        {"proposed",      {QBrush{       road_color},     3,   Qt::DashLine}},
-        {"track",         {QBrush{       road_color},     2}},
+        {L_ABANDONED,         {QBrush{abandoned_color},         0.8, Qt::DashDotLine}},
+        {L_UNKNOWN_PATH,      {QBrush{abandoned_color},         0.8, Qt::DashDotLine}},
+        {L_CONSTRUCTION,      {QBrush{construction_color},      2.0, Qt::DashLine}},
+        {L_PATH,              {QBrush{foot_way_color},          1.5, Qt::DashLine}},
+        {L_STEPS,             {QBrush{foot_way_color},          2.0, Qt::DotLine}},
+        {L_SERVICE,           {QBrush{road_color_secondary},    1.5, Qt::SolidLine}},
+        {L_TRANSPORT,         {QBrush{road_color_secondary},    1.5, Qt::SolidLine}},
+        {L_CYCLEWAY,          {QBrush{cycleway_color},          2.0, Qt::SolidLine}},
+        {L_TRACK,             {QBrush{road_color_secondary},    2.5, Qt::SolidLine}},
+        {L_RESIDENTIAL,       {QBrush{road_color_secondary},    2.8, Qt::SolidLine}},
+        {L_TERTIARY,          {QBrush{road_color_main},         3.2, Qt::SolidLine}},
+        {L_SECONDARY,         {QBrush{road_color_main},         3.8, Qt::SolidLine}},
+        {L_PRIMARY,           {QBrush{road_color_main},         4.6, Qt::SolidLine}},
+        {L_TRUNK,             {QBrush{road_color_main},         5.4, Qt::SolidLine}},
+        {L_MOTORWAY,          {QBrush{road_color_main},         5.6, Qt::SolidLine}}
     };
 
-    const QBrush apartments_brush   {QColor{255, 218, 185}};
-    const QBrush office_brush       {QColor{255, 255, 30}};
-    const QBrush shop_brush         {QColor{200, 200, 200}};
-    const QBrush edu_brush          {QColor{255, 228, 181}};
-    const QBrush medicine_brush     {QColor{255, 133, 133}};
-    const QBrush manufacture_brush  {QColor{156, 156, 156}};
-    const QBrush disused_brush      {QColor{102, 102, 0}};
-    const QBrush religion_brush     {QColor{200, 25,  222}};
-    const QBrush yes_brush          {QColor{128, 128, 0}};
-    const QBrush transport_brush    {QColor{125, 225, 75}};
+    // Define colors for different types of areas/buildings
+    const std::unordered_map<PolygonTypes, QBrush> polygons =
+    {
+        // buildings
+        {P_APARTMENTS,        {QColor{90,  110, 140}}},  // Muted blue-gray
+        {P_OFFICE,            {QColor{80,  100, 130}}},  // Muted steel blue
+        {P_SHOP,              {QColor{130, 100, 80 }}},  // Muted brown-orange
+        {P_EDUCATION,         {QColor{100, 130, 100}}},  // Muted green
+        {P_MEDICINE,          {QColor{130, 80,  80 }}},  // Muted red
+        {P_MANUFACTURE,       {QColor{110, 110, 110}}},  // Medium gray
+        {P_DISUSED,           {QColor{80,  80,  80 }}},  // Dark gray
+        {P_RELIGION,          {QColor{110, 90,  130}}},  // Muted purple
+        {P_GOVERNMENT,        {QColor{90,  110, 130}}},  // Muted teal
+        {P_TRANSPORT,         {QColor{60,  60,  60 }}},  // Very dark gray
+        {P_HOSPITALITY,       {QColor{120, 110, 90 }}},  // Muted beige
+        {P_CULTURE,           {QColor{100, 80,  110}}},  // Muted lavender
+        {P_CONSTRUCTION,      {QColor{140, 100, 70 }}},  // Muted brown
+        {P_PUBLIC,            {QColor{100, 130, 100}}},  // Muted green (same as education)
+        {P_BANK,              {QColor{130, 130, 90 }}},  // Muted olive
+        {P_SPORT,             {QColor{80,  130, 130}}},  // Muted cyan
 
-    const std::unordered_map<PolygonTypes, QBrush> polygons = {
-        {APARTMENTS,        {QColor{255, 230, 150}}}, // Light yellow
-        {OFFICE,            {QColor{255, 255, 30}}},  // Bright yellow
-        {SHOP,              {QColor{240, 180, 100}}}, // Warm orange
-        {EDUCATION,         {QColor{120, 220, 120}}}, // Pastel green  
-        {MEDICINE,          {QColor{250, 80, 80}}},   // Soft red
-        {MANUFACTURE,       {QColor{160, 160, 160}}}, // Medium gray
-        {DISUSED,           {QColor{140, 140, 140}}}, // Dark gray
-        {RELIGION,          {QColor{200, 150, 200}}}, // Pale purple
-        {GOVERMENT,         {QColor{100, 150, 200}}}, // Blue-gray
-        {TRANSPORT,         {QColor{50, 50, 50}}},    // Very dark gray
-        {HOSPITALITY,       {QColor{220, 190, 130}}}, // Beige
-        {CULTURE,           {QColor{180, 100, 180}}}, // Lavender
-        {CONSTRUCTION,      {QColor{200, 100, 50}}},  // Burnt orange
-        {PUBLIC,            {QColor{150, 200, 150}}}, // Mint green
-        {BANK,              {QColor{200, 200, 100}}}, // Light gold
-        {SPORT,             {QColor{100, 200, 200}}}, // Pale cyan
+        // Natural
+        {P_NATURAL_WOOD,      {QColor{30,  100, 30 }}},  // Dark green for forests
+        {P_NATURAL_GRASSLAND, {QColor{50,  150, 50 }}},  // Medium green for grasslands
+        {P_NATURAL_WATER,     {QColor{30,  60,  120}}},  // Dark blue for water bodies
+        {P_NATURAL_WETLAND,   {QColor{40,  80,  60 }}},  // Teal for wetlands
+        {P_NATURAL_ROCK,      {QColor{100, 100, 100}}}, // Medium gray for rocky areas
+        {P_NATURAL_SAND,      {QColor{140, 120, 80 }}},  // Muted sandy brown
+        {P_NATURAL_ICE,       {QColor{160, 200, 220}}},  // Light blue for ice/snow
+        {P_NATURAL_LANDFORM,  {QColor{90,  90,  70 }}},  // Dark beige for landforms
+        {P_NATURAL_ANIMAL,    {QColor{170, 110, 80 }}},  // Soft brown for animal areas
+        {P_NATURAL_BUSH,      {QColor{40,  100, 40 }}},  // Dark green (slightly different) for bushes
+        {P_NATURAL_HANDMADE,  {QColor{110, 90,  70 }}}  // Muted brown for handmade natural features
+    
     };
 
 
@@ -96,19 +105,6 @@ struct MapStyle
     const QBrush grass_area        {QColor{65,152,10, 255}};
     // const QBrush swimming_area     {}
 
-
-    const brush_map areas =
-    {
-        {"construction",        manufacture_area},
-        {"disused",             disused_area},
-        {"wood",                wood_area},
-        {"park",                park_area},
-        {"water",               water_area},
-        {"swimming_area",       water_area}, // TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        {"beach_resort",        beach_area},
-        {"wetland",             swamp_area},
-        {"grassland",           grass_area},
-    };
 };
 
 

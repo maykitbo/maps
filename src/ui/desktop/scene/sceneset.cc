@@ -21,6 +21,17 @@ QPointF SceneSet::adaptPoint(point_s point) const
 }
 
 
+QPointF SceneSet::adaptPoint(QPointF point) const
+{
+    return QPointF
+    {
+        (point.x() - bbox.min_lon) * lon_scale,
+        height - (point.y() - bbox.min_lat) * lat_scale
+    };
+}
+
+
+
 QPointF SceneSet::adaptPoint(coord_t lat, coord_t lon) const
 {
     return QPointF

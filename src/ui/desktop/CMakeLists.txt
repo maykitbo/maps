@@ -26,7 +26,7 @@ set(HEADERS
     ${MAINWINDOW_DIR}/mainwindow.h
     ${SCENE_DIR}/scene.h
     ${SCENE_DIR}/sceneset.h
-    ${SCENE_DIR}/mapitems.h
+    # ${SCENE_DIR}/mapitems.h
     ${STYLE_DIR}/map_style.h
     ${STYLE_DIR}/lod.h
 )
@@ -36,7 +36,7 @@ set(SOURCES
     ${MAINWINDOW_DIR}/mainwindow.cc
     ${SCENE_DIR}/scene.cc
     ${SCENE_DIR}/sceneset.cc
-    ${SCENE_DIR}/mapitems.cc
+    # ${SCENE_DIR}/mapitems.cc
 )
 
 set(UI

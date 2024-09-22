@@ -6,13 +6,13 @@
 #include <QFuture>
 #include <QFutureWatcher>
 #include <QMetaObject>
+#include <QGraphicsPolygonItem>
+// #include <QGraphicsLineItem>
 
-#include "idata.h"
+#include "idata/idata.h"
 #include "sceneset.h"
-#include "mapitems.h"
 #include "map_style.h"
 #include "lod.h"
-#include "draw_polygon_data.h"
 
 #include "time_test.h"
 
@@ -38,60 +38,76 @@ class Scene : public QGraphicsScene
         void scrollAway();
     
     protected:
+        class QPointFPreprocess;
         friend class QPointFPreprocess;
-        inline static SceneSet set_;
-        inline static MapStyle style_;
+        SceneSet set_;
+        MapStyle style_;
 
         const IData& data_;
 
+        using PolygonSet = decltype(
+            data_.fethPolygons<QPolygonF, QPointFPreprocess>(
+                bbox_s{}, d_area_s{}, 0));
+        
+        using LineSet = decltype(
+            data_.fethLines<QPolygonF, QPointFPreprocess>(
+                bbox_s{}, 0, 0));
+
         void drawMap();
-        void drawMap2();
+        // void drawMap2();
 
         void move(coord_t x, coord_t y);
         void scroll(coord_t v);
 
-        template<class Item>
-        void drawItems(const GeoJson& osm);
+        void drawPolygons(const PolygonSet& set);
+        void drawLines(const LineSet& set);
 
-        template<class Item, class Func>
-        QFuture<void> fetchDraw(const Func &func);
+        void adapt(QPolygonF& polygon)
+        {
+            for (auto& point : polygon)
+            {
+                point = set_.adaptPoint(point);
+            }
+        }
 
 };
 
 
-struct QPointFPreprocess
+
+struct Scene::QPointFPreprocess
 {
     static QPointF act(double lat, double lon)
     {
-        return Scene::set_.adaptPoint(lat, lon);
+        // return Scene::set_.adaptPoint(lat, lon);
+        return QPointF{lon, lat};
     }
 };
 
 
-template<class Item, class Func>
-QFuture<void> Scene::fetchDraw(const Func &func)
-{
-    return QtConcurrent::run([&]() {
-        GeoJson polygons = func();
-        QMetaObject::invokeMethod(this,
-            [&, p = std::move(polygons)]()
-            {
-                drawItems<Item>(p);
-            },
-            Qt::QueuedConnection);
-    });
-}
+// template<class Item, class Func>
+// QFuture<void> Scene::fetchDraw(const Func &func)
+// {
+//     return QtConcurrent::run([&]() {
+//         GeoJson polygons = func();
+//         QMetaObject::invokeMethod(this,
+//             [&, p = std::move(polygons)]()
+//             {
+//                 drawItems<Item>(p);
+//             },
+//             Qt::QueuedConnection);
+//     });
+// }
 
 
-template<class Item>
-void Scene::drawItems(const GeoJson& osm)
-{
-    osm.features([&](const GeoJson::Feature& feature) {
-        Item* item = new Item(set_, style_, feature);
-        item->draw();
-        addItem(item);
-    });
-}
+// template<class Item>
+// void Scene::drawItems(const GeoJson& osm)
+// {
+//     osm.features([&](const GeoJson::Feature& feature) {
+//         Item* item = new Item(set_, style_, feature);
+//         item->draw();
+//         addItem(item);
+//     });
+// }
 
 
 } // namespace maykitbo::maps
