@@ -5,6 +5,9 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <iostream>
+#include <list>
+#include <set>
+#include <nlohmann/json.hpp>
 
 #include "config.h"
 #include "postgis_connector.h"
@@ -19,6 +22,68 @@
 
 namespace maykitbo::maps
 {
+
+
+// Helper function to split columns string into individual columns
+std::vector<std::string> splitColumns(const std::string& columns_string)
+{
+    std::string str = columns_string;
+    std::vector<std::string> columns;
+    size_t pos = 0;
+    str.erase(0, 1);
+    while ((pos = str.find(", ")) != std::string::npos)
+    {
+        columns.push_back(str[0] == '"' ? str.substr(1, pos - 2) : str.substr(0, pos));
+        str.erase(0, pos + 2);
+    }
+    columns.push_back(str);
+    return columns;
+}
+
+
+void createJson(const std::string& table)
+{
+    auto columns = splitColumns(DBStruct::ALL_INFO_COLUMNS_POLYGON);
+    for (auto col : columns) std::cout << col << ' ';
+    std::cout << '\n';
+
+    // Create a JSON object to store the result
+    nlohmann::json j;
+
+    for (const auto& col : columns)
+    {
+        std::cout << col << '\n';
+        try
+        {
+            pqxx::connection c(Conf::postgis);
+            pqxx::work w(c);
+            pqxx::result R = w.exec(
+                "SELECT DISTINCT \"" + col + "\" FROM " + table + " WHERE \"" + col + "\" IS NOT NULL;");
+            
+            w.commit();
+
+            std::set<std::string> unique_values;
+
+            // Iterate through each row in the result
+            for (const auto& row : R)
+            {
+                // Add the value to the set
+                unique_values.insert(row[col].as<std::string>());
+            }
+
+            // Add the column and its unique values to the JSON object
+            j[col] = unique_values;
+        }
+        catch (const std::exception& e)
+        {
+            std::cout << e.what() << '\n';
+        }
+    }
+
+    // Write the JSON object to a file
+    std::ofstream outFile("src/data/tune_db/" + table + "_mapping.json");
+    outFile << j.dump(4); // Pretty print with indentation
+}
 
 
 std::pair<
@@ -66,6 +131,23 @@ std::pair<
             file.ignore(1024, '\n');
     }
     return std::make_pair(std::move(types), std::move(mapping));
+}
+
+
+void printMappingTypes(const std::unordered_map<std::string, int>& mapping,
+                       const std::unordered_map<std::string, int>& types)
+{
+    std::cout << "_____\n\n";
+    for (auto w : types)
+    {
+        std::cout << w.first << " | " << w.second << '\n';
+    }
+    std::cout << "_____\n\n";
+    for (auto w : mapping)
+    {
+        std::cout << w.first << " | " << w.second << '\n';
+    }
+    std::cout << "_____\n\n";
 }
 
 
@@ -174,37 +256,40 @@ void realBuildings(const std::unordered_map<std::string, int>& mapping)
 }
 
 
-void anamiseHelper(const std::unordered_map<std::string, int>& mapping,
-                   const std::unordered_map<std::string, int>& types,
-                   const std::string& col)
+void analise(const std::unordered_map<std::string, int>& mapping,
+             const std::unordered_map<std::string, int>& types,
+             const std::string& col,
+             const std::string& table)
 {
     pqxx::connection c(Conf::postgis);
     pqxx::work w(c);
     pqxx::result R = w.exec(
-        "SELECT osm_id, " + col + " FROM planet_osm_polygon WHERE draw_type < 0 AND " + col + " IS NOT NULL");
+        "SELECT osm_id, name, draw_type, " + col + " FROM " + table + " WHERE draw_type >= 0-10 AND " + col + " IS NOT NULL");
+    // "SELECT osm_id, name, draw_type, " + col + " FROM " + table + " WHERE " + col + " LIKE 'region'");
     w.commit();
 
-    std::unordered_set<std::string> set;
+    // std::unordered_set<std::string> set;
+    std::unordered_map<std::string, int> map;
+
+    // for (const auto& r : R)
+    // {
+    //     std::cout << r["name"].c_str() << '\n';
+    // }
+    // return;
 
     for (const auto& r : R)
     {
         if (mapping.find(r[col].c_str()) == mapping.end())
-            set.insert(r[col].c_str());
+            // set.insert(r[col].c_str());
+            ++map[r[col].c_str()];
     }
 
-    for (const auto& s : set)
+    for (const auto& s : map)
     {
-        std::cout << s << '\n';
+        std::cout << s.first << "\t\t\t" << s.second << '\n';;
     }
-}
 
-
-void analiseAreas(const std::unordered_map<std::string, int>& mapping,
-                  const std::unordered_map<std::string, int>& types)
-{
-    anamiseHelper(mapping, types, "\"natural\"");
-
-    
+    std::cout << "size = " << R.size() << '\n';
 }
 
 

@@ -1,0 +1,32 @@
+TYPES
+38 PLACE_CITY
+39 PLACE_SUBURBAN_AREA
+40 PLACE_RURAL_AREA
+41 PLACE_NATURAL_FEATURE
+42 PLACE_ADMINISTRATIVE_AREA
+44 PLACE_SITE
+45 PLACE_REGION
+46 PLACE_AGRONOMY
+#
+MAPPING
+region                  PLACE_REGION
+cottage_settlement      PLACE_SUBURBAN_AREA
+archipelago             PLACE_NATURAL_FEATURE
+municipality            PLACE_CITY
+sea                     PLACE_NATURAL_FEATURE
+fish_farm               PLACE_AGRONOMY
+city_block              PLACE_SUBURBAN_AREA
+district                PLACE_SUBURBAN_AREA
+county                  PLACE_ADMINISTRATIVE_AREA
+hamlet                  PLACE_RURAL_AREA
+quarter                 PLACE_SUBURBAN_AREA
+village                 PLACE_RURAL_AREA
+island                  PLACE_NATURAL_FEATURE
+farm                    PLACE_RURAL_AREA
+town                    PLACE_CITY
+allotments              PLACE_SUBURBAN_AREA
+isolated_dwelling       PLACE_BUILDING
+square                  PLACE_SITE
+neighbourhood           PLACE_SUBURBAN_AREA
+city                    PLACE_CITY
+
