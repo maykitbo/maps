@@ -27,6 +27,7 @@ class MainWindow : public QMainWindow
 
         void connectKeyEvents();
         bool keyPress(QKeyEvent* key_event);
+        void initScene();
     
     signals:
         void moveLeft();

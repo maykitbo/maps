@@ -143,9 +143,13 @@ void Scene::drawPolygons(const PolygonSet& set)
         if (type_iter != style_.polygons.end())
         {
             QPolygonF polygon = feature.coordinates();
+            idx_t id = feature.idx();
             adapt(polygon);
-            QGraphicsPolygonItem* item = new QGraphicsPolygonItem(polygon);
-            item->setBrush(type_iter->second);
+            PolygonItem* item = new PolygonItem(polygon, id, type_iter->second, data_);
+            // connect(item, &PolygonItem::mousePressed, [id] {
+            //     std::cout << "Scene get moused pressed event from polygon with id = " << id << '\n';
+            // });
+            
             addItem(item);
         }
         // else
@@ -154,6 +158,7 @@ void Scene::drawPolygons(const PolygonSet& set)
         // }
     }    
 }
+
 
 void Scene::drawLines(const LineSet& set)
 {
@@ -177,3 +182,13 @@ void Scene::drawLines(const LineSet& set)
         // }
     }    
 }
+
+
+void Scene::adapt(QPolygonF& polygon)
+{
+    for (auto& point : polygon)
+    {
+        point = set_.adaptPoint(point);
+    }
+}
+

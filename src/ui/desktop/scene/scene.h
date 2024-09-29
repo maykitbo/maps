@@ -7,12 +7,14 @@
 #include <QFutureWatcher>
 #include <QMetaObject>
 #include <QGraphicsPolygonItem>
+#include <QGraphicsSceneMouseEvent>
 // #include <QGraphicsLineItem>
 
 #include "idata/idata.h"
 #include "sceneset.h"
 #include "map_style.h"
 #include "lod.h"
+#include "mapitems.h"
 
 #include "time_test.h"
 
@@ -36,10 +38,12 @@ class Scene : public QGraphicsScene
         void moveDown();
         void scrollCloser();
         void scrollAway();
+        
     
     protected:
         class QPointFPreprocess;
-        friend class QPointFPreprocess;
+        // friend class QPointFPreprocess;
+
         SceneSet set_;
         MapStyle style_;
 
@@ -54,7 +58,6 @@ class Scene : public QGraphicsScene
                 bbox_s{}, 0, 0));
 
         void drawMap();
-        // void drawMap2();
 
         void move(coord_t x, coord_t y);
         void scroll(coord_t v);
@@ -62,14 +65,17 @@ class Scene : public QGraphicsScene
         void drawPolygons(const PolygonSet& set);
         void drawLines(const LineSet& set);
 
-        void adapt(QPolygonF& polygon)
-        {
-            for (auto& point : polygon)
-            {
-                point = set_.adaptPoint(point);
-            }
-        }
+        void adapt(QPolygonF& polygon);
 
+        // void mousePressEvent(QGraphicsSceneMouseEvent *event) override
+        // {
+        //     QObject* sender = QObject::sender();
+        //     PolygonItem* polyitem = dynamic_cast<PolygonItem*>(sender);
+        //     if (polyitem != nullptr)
+        //         std::cout << polyitem->id() << ": MOUSE PRESSED\n";
+        //     // emit mousePressed();
+        //     std::cout << "AAA\n";
+        // }
 };
 
 

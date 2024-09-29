@@ -17,6 +17,8 @@ struct MapStyle
 {
     using brush_map = std::unordered_map<std::string, const QBrush&>;
 
+    static const int hover_highlight = 150;
+
     const bbox_s init_bbox
         {55.816, 55.809, 37.667, 37.645};
 
@@ -60,6 +62,7 @@ struct MapStyle
     // Define colors for different types of areas/buildings
     const std::unordered_map<PolygonTypes, QBrush> polygons =
     {
+        {P_UNKNOWN,           {QColor{255, 0,   0  }}},
         // buildings
         {P_APARTMENTS,        {QColor{90,  110, 140}}},  // Muted blue-gray
         {P_OFFICE,            {QColor{80,  100, 130}}},  // Muted steel blue

@@ -4,72 +4,68 @@
 #include <QGraphicsScene>
 #include <QPolygon>
 #include <QGraphicsLineItem>
+#include <QGraphicsSceneHoverEvent>
+#include <QObject>
+#include <QGraphicsSceneMouseEvent>
 
-#include "sceneset.h"
-#include "geojson_handler.h"
+// #include "sceneset.h"
 #include "map_style.h"
+// #include "scene.h"
 
 
 namespace maykitbo::maps
 {
 
 
-class MapItem : public QGraphicsPathItem
-{
-    public:
-        MapItem(const SceneSet& set, const MapStyle& style,
-                const GeoJson::Feature& feature);
-        virtual ~MapItem() = default;
-        void draw();
-
-    protected:
-        const SceneSet& set_;
-        const MapStyle style_;
-        const GeoJson::Feature& feature_;
-        QPolygonF polygon_;
-        QPainterPath path_;
-        virtual bool paint() = 0;
-};
-
-
-class PolygonItem : public MapItem
-{
-    using MapItem::MapItem;
-    public:
-        // PolygonItem()
-        bool paint() override;
-    private:
-        bool findBrush(const MapStyle::brush_map& map,
-                      const std::string& key);
-};
-
-
-// class PolygonItem : public QGraphicsPolygonItem
+// class MetaItem
 // {
-//     // using MapItem::MapItem;
 //     public:
-//         PolygonItem();
-        
-//         // bool paint() override;
-//     private:
-//         // bool findBrush(const MapStyle::brush_map& map,
-//         //               const std::string& key);
-// };
+//         MetaItem()
+// }
 
 
-class RoadItem : public MapItem
+class PolygonItem : public QObject, public QGraphicsPolygonItem
 {
-    using MapItem::MapItem;
-    public:
-        bool paint() override;
-};
+    Q_OBJECT
 
-
-class LineItem : public MapItem
-{
-    using MapItem::MapItem;
     public:
-        bool paint() override;
+        PolygonItem(const QPolygonF& polygon, idx_t id, const QBrush& brush, const IData& db) :
+            QGraphicsPolygonItem(polygon),
+            id_(id),
+            basic_brush_(brush),
+            highlight_brush_{brush.color().lighter(MapStyle::hover_highlight)},
+            db_(db)
+        {
+            setBrush(basic_brush_);
+            setAcceptHoverEvents(true);
+        }
+        idx_t idx() const { return id_; }
+
+    // signals:
+    //     void mousePressed();
+
+    private:
+        idx_t id_;
+        QBrush basic_brush_;
+        QBrush highlight_brush_;
+        const IData& db_;
+
+        void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override
+        {
+            setBrush(highlight_brush_);
+        }
+
+        void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override
+        {
+            setBrush(basic_brush_);
+        }
+
+        void mousePressEvent(QGraphicsSceneMouseEvent *event) override
+        {
+            std::cout << "\n" << id_ << ": MOUSE PRESSED\n" << db_.polygonInfoAsString(id_) << "\n\n";
+            // emit mousePressed();
+        }
+
 };
 
 

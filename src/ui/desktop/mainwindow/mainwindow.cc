@@ -10,6 +10,14 @@ MainWindow::MainWindow(const IData& data, QWidget* parent) :
     view_(new QGraphicsView(this)),
     scene_(new Scene(data_, this))
 {
+    initScene();
+
+    setGeometry(10, 10, scene_->width() * 1.05, scene_->height() * 1.05);
+}
+
+
+void MainWindow::initScene()
+{
     view_->setScene(scene_);
     setCentralWidget(view_);
     
@@ -20,8 +28,6 @@ MainWindow::MainWindow(const IData& data, QWidget* parent) :
     connectKeyEvents();
 
     scene_->initMap();
-
-    setGeometry(10, 10, scene_->width() * 1.05, scene_->height() * 1.05);
 }
 
 
