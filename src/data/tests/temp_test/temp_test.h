@@ -3,6 +3,7 @@
 
 #include <iostream>
 
+
 #include "idata.h"
 #include "config.h"
 
@@ -10,11 +11,13 @@
 namespace TEMP
 {
 
+using namespace maykitbo::maps;
 
 void test()
 {
-    maykitbo::maps::IData db(maykitbo::maps::Conf::postgis);
+    IData db(Conf::postgis);
     // db.fethLines()
+    db.connector().listColumns(DBStruct::POLYGON_TABLE);
 }
 
 

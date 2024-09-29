@@ -7,7 +7,7 @@ namespace maykitbo::maps
 
 enum PolygonTypes
 {
-    P_DEFAULT = -1,
+    P_UNKNOWN = -1,
     // buildings:
     P_APARTMENTS,
     P_OFFICE,
@@ -25,17 +25,17 @@ enum PolygonTypes
     P_PUBLIC,
     P_BANK,
     P_SPORT,
-    // areas:
-    P_NATURAL_WOOD
-    P_NATURAL_GRASSLAND
-    P_NATURAL_WATER
-    P_NATURAL_WETLAND
-    P_NATURAL_ROCK
-    P_NATURAL_SAND
-    P_NATURAL_ICE
-    P_NATURAL_LANDFORM
-    P_NATURAL_ANIMAL
-    P_NATURAL_BUSH
+    // natural:
+    P_NATURAL_WOOD = 18,
+    P_NATURAL_GRASSLAND,
+    P_NATURAL_WATER,
+    P_NATURAL_WETLAND,
+    P_NATURAL_ROCK,
+    P_NATURAL_SAND,
+    P_NATURAL_ICE,
+    P_NATURAL_LANDFORM,
+    P_NATURAL_ANIMAL,
+    P_NATURAL_BUSH,
     P_NATURAL_HANDMADE
 };
 

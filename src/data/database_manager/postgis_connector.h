@@ -42,6 +42,7 @@ class PostGISConnector
                                     const bbox_s& bbox,
                                     int min_draw_type,
                                     int limit) const;
+        pqxx::result getInfoById(const std::string& table, idx_t id) const;
         
         int sridCheck(const std::string& table) const;
 

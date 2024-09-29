@@ -42,7 +42,6 @@ class PostGisQuery
         // {
         // std::string srid_out_s = std::to_string(srid_out);
         // std::string srid_in_s = std::to_string(srid_in);
-
         // return R"(
         //     SELECT jsonb_build_object(
         //     'type',     'FeatureCollection',
@@ -82,7 +81,6 @@ class PostGisQuery
         // {
         // std::string srid_out_s = std::to_string(srid_out);
         // std::string srid_in_s = std::to_string(srid_in);
-
         // return R"(
         //     SELECT jsonb_build_object(
         //     'type',     'FeatureCollection',
@@ -122,6 +120,31 @@ class PostGisQuery
                 std::to_string(bbox.max_lat);
         }
 
+        
+        static std::string idListToString(const std::vector<int>& ids) {
+            std::ostringstream oss;
+            for (size_t i = 0; i < ids.size(); ++i) {
+                if (i != 0) oss << ",";
+                oss << ids[i];
+            }
+            return oss.str();
+        }
+
+        // static std::string infoByIndex(const std::string& table,
+        //                               idx_t id)
+        // {
+        //     return
+        //         "SELECT " +
+        // }
+
+        static std::string infoById(const std::string& table, idx_t id)
+        {
+            return
+                "SELECT " + DBDT::ALL_INFO_COLUMNS +
+                " FROM " + table +
+                " WHERE " + DBDT::ID_COL + " = " + std::to_string(id) + ";";
+        }
+
         static std::string bboxMinDrawType(const std::string& table,
                                 const bbox_s& bbox,
                                 int min_draw_type,
@@ -130,13 +153,17 @@ class PostGisQuery
             return
                 "SELECT " + 
                     DBDT::ID_COL + ", "
+
                     // "ST_Transform(" + DBDT::WAY_COL + ", " + 
                     //     std::to_string(DBDT::SRID_OUT) +
                     // ") AS "+ DBDT::WAY_WKB_COL + ", " +
+
                     "ST_AsText(ST_Transform(way, " + 
                         std::to_string(DBDT::SRID_OUT) +
                     ")) AS " + DBDT::TEXT_WAY_COL + ", " + 
+
                     DBDT::DRAW_TYPE_COL +
+
                 " FROM " + table +
                 " WHERE " +
                     table + "." + DBDT::WAY_COL + " && ST_Transform("
@@ -158,13 +185,19 @@ class PostGisQuery
             return
                 "SELECT " + 
                     DBDT::ID_COL + ", "
+
                     // "ST_Transform(" + DBDT::WAY_COL + ", " + 
                     //     std::to_string(DBDT::SRID_OUT) +
                     // ") AS "+ DBDT::WAY_WKB_COL + ", " +
+
                     "ST_AsText(ST_Transform(way, " + 
                         std::to_string(DBDT::SRID_OUT) +
                     ")) AS " + DBDT::TEXT_WAY_COL + ", " + 
+
                     DBDT::DRAW_TYPE_COL +
+
+                    // DBDT::ALL_INFO_COLUMNS +
+
                 " FROM " + table +
                 " WHERE " +
                     table + "." + DBDT::WAY_COL + " && ST_Transform("
@@ -176,7 +209,7 @@ class PostGisQuery
                     ")"
                     " AND " + DBDT::WAY_AREA_COL + " > " + std::to_string(darea.min) +
                     " AND " + DBDT::WAY_AREA_COL + " < " + std::to_string(darea.max) +
-                    " AND " + DBDT::DRAW_TYPE_COL + " >= 0"
+                    // " AND " + DBDT::DRAW_TYPE_COL + " >= 0"
                 " LIMIT " + std::to_string(limit) + ";";
 
             // return

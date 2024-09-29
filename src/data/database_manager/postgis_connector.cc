@@ -117,6 +117,25 @@ void PostGISConnector::listColumns(const std::string& table) const
 }
 
 
+pqxx::result PostGISConnector::getInfoById(const std::string& table, idx_t id) const
+{
+    pqxx::result R = executeNonTransactionalQuery(
+        PostGisQuery::infoById(table, id)
+    );
+    if (R.empty())
+    {
+        LOG << WARNING << "No data fund for id " << std::to_string(id) << LOG;
+        return pqxx::result{};
+    }
+
+    LOG << MESSAGE <<
+        "Data for id " << std::to_string(id) << " found successfully" <<
+    LOG;
+
+    return R;
+}
+
+
 pqxx::result PostGISConnector::fetchBboxDarea(const std::string& table,
                                         const bbox_s& bbox,
                                         d_area_s darea,
