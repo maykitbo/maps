@@ -57,6 +57,7 @@ struct d_area_s
     coord_t min;
     coord_t max;
     d_area_s(coord_t min, coord_t max) : min(min), max(max) {}
+    d_area_s() = default;
 };
 
 /**
