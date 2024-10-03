@@ -11,8 +11,8 @@ MainWindow::MainWindow(const IData& data, QWidget* parent) :
     scene_(new Scene(data_, this))
 {
     initScene();
-
     setGeometry(10, 10, scene_->width() * 1.05, scene_->height() * 1.05);
+    // setGeometry(10, 10, 1000, 1000 * 1.05);
 }
 
 
@@ -23,7 +23,7 @@ void MainWindow::initScene()
     
     scene_->installEventFilter(this);
     view_->installEventFilter(this);
-    setFocusPolicy(Qt::StrongFocus); 
+    // setFocusPolicy(Qt::StrongFocus); 
 
     connectKeyEvents();
 

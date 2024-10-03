@@ -72,10 +72,7 @@ struct bbox_s {
 
     friend std::ostream &operator<<(std::ostream& os, const bbox_s& b)
     {
-        os << "max_lat = " << b.max_lat << '\n';
-        os << "min_lat = " << b.min_lat << '\n';
-        os << "max_lon = " << b.max_lon << '\n';
-        os << "min_lon = " << b.min_lon << '\n';
+        os << b.max_lat << ", " << b.min_lat << ", " << b.max_lon << ", " << b.min_lon;
         return os;
     }
     bbox_s(coord_t top, coord_t buttom, coord_t right, coord_t left)

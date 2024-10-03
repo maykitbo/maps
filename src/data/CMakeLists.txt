@@ -17,13 +17,15 @@ set(TUNE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tune_db)
 
 
 set(SOURCES
-    ${DATA_MANAGER_DIR}/postgis_connector.cc
-    ${DATA_MANAGER_DIR}/postgis_connector.h
+    ${DATA_MANAGER_DIR}/connector.cc
+    ${DATA_MANAGER_DIR}/connector.h
     ${DATA_MANAGER_DIR}/queries.h
-    ${DATA_MANAGER_DIR}/database_structure.h
+    ${DATA_MANAGER_DIR}/queries.cc
+    ${DATA_MANAGER_DIR}/structure.h
     ${SHARED_DIR}/types.h
     ${SHARED_DIR}/log.h
     ${INTERFACE_DIR}/idata.h
+    ${INTERFACE_DIR}/idata.cc
     ${INTERFACE_DIR}/types/line.h
     ${INTERFACE_DIR}/types/polygon.h
     ${INTERFACE_DIR}/features/feature.h
@@ -74,6 +76,7 @@ if(TUNE_DATABASE)
         ${TUNE_DIR}/tune.h
         ${TUNE_DIR}/main.cc
         ${SHARED_DIR}/config.h
+        ${SHARED_DIR}/time_test.h
     )
 
     add_executable(tune_database ${TUNE_SOURCES})

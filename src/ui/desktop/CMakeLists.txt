@@ -16,27 +16,26 @@ find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets Concurrent REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets Concurrent REQUIRED)
 
 set(DB_LIB_PATH CACHE PATH "Path to the database library")
-set(CORE_LIB_PATH CACHE PATH "Path to the database library")
+set(CORE_LIB_PATH CACHE PATH "Path to the core library")
 
-set(SCENE_DIR scene)
-set(MAINWINDOW_DIR mainwindow)
-set(STYLE_DIR style)
 
 set(HEADERS
-    ${MAINWINDOW_DIR}/mainwindow.h
-    ${SCENE_DIR}/scene.h
-    ${SCENE_DIR}/sceneset.h
-    ${SCENE_DIR}/mapitems.h
-    ${STYLE_DIR}/map_style.h
-    ${STYLE_DIR}/lod.h
+    mainwindow/mainwindow.h
+    drawing/scene/scene.h
+    drawing/sceneset/sceneset.h
+    drawing/mapitems/mapitems.h
+    drawing/style/map_style.h
+    drawing/style/lod.h
 )
 
 set(SOURCES
     main.cc
-    ${MAINWINDOW_DIR}/mainwindow.cc
-    ${SCENE_DIR}/scene.cc
-    ${SCENE_DIR}/sceneset.cc
-    # ${SCENE_DIR}/mapitems.cc
+    mainwindow/mainwindow.cc
+    drawing/scene/scene.cc
+    drawing/scene/draw.cc
+    drawing/scene/connect.cc
+    drawing/sceneset/sceneset.cc
+    drawing/mapitems/mapitems.cc
 )
 
 set(UI
@@ -60,9 +59,12 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC 
-    ${SCENE_DIR}
-    ${MAINWINDOW_DIR}
-    ${STYLE_DIR}
+    drawing
+    drawing/scene
+    drawing/sceneset
+    drawing/mapitems
+    mainwindow
+    drawing/style
 )
 
 if(QT_VERSION_MAJOR EQUAL 6)

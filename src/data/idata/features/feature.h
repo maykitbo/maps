@@ -3,7 +3,11 @@
 #include <sstream>
 #include <vector>
 
+#include "pqxx/pqxx"
+
+
 #include "types.h"
+#include "structure.h"
 
 
 namespace maykitbo::maps
@@ -23,50 +27,97 @@ struct CoordPreprocess
 template<class way_conteiner, class coords_preprocess>
 struct WKBParser
 {
-
     static way_conteiner read(const char* text);
-
 
     static way_conteiner parse(const char* wkb);
 };
 
 
-template<class way_conteiner, class coords_preprocess, class ItemTypes>
+template<class way_conteiner, class coords_preprocess>
 class Feature
 {
+    using DBDT = db::DBStruct;
+
     public:
-        Feature() = default;
-        void parse(idx_t idx, const char* wkb, ItemTypes draw_type);
+        // Feature() = default;
+        void parse(const pqxx::row& feature)
+        {
+            idx_ = feature[DBDT::ID_COL].as<idx_t>();
+            coordinates_ = std::move(
+                WKBParser<way_conteiner, coords_preprocess>::read(
+                    feature[DBDT::TEXT_WAY_COL].c_str()));
+        }
+        
 
         idx_t idx() const
             { return idx_; }
         const way_conteiner& coordinates() const
             { return coordinates_; }
-        way_conteiner& coordinates()
-            { return coordinates_; }
+        // way_conteiner& coordinates()
+        //     { return coordinates_; }
+
+    protected:
+
+        idx_t idx_;
+        way_conteiner coordinates_;
+};
+
+
+template<class way_conteiner, class coords_preprocess, class ItemTypes>
+class DrawFeature : public Feature<way_conteiner, coords_preprocess>
+{
+    using DBDT = db::DBStruct;
+    using F =  Feature<way_conteiner, coords_preprocess>;
+    public:
+        void parse(const pqxx::row& feature)
+        {
+            F::idx_ = feature[DBDT::ID_COL].as<idx_t>();
+            F::coordinates_ = std::move(
+                WKBParser<way_conteiner, coords_preprocess>::read(
+                    feature[DBDT::TEXT_WAY_COL].c_str()));
+            type_ = static_cast<ItemTypes>(feature[DBDT::DRAW_TYPE_COL].as<int>());
+        }
+
         ItemTypes type() const
             { return type_; }
 
     private:
-
-        idx_t idx_;
-        way_conteiner coordinates_;
         ItemTypes type_;
 };
 
 
-template
-<class way_conteiner, class coords_preprocess, class ItemTypes>
-void Feature<way_conteiner, coords_preprocess, ItemTypes>
-::parse(idx_t idx, const char* wkb, ItemTypes draw_type)
-{
-    idx_ = idx;
-    // coordinates_ = std::move(
-        // WKBParser<way_conteiner, coords_preprocess>::parse(wkb));
-    coordinates_ = std::move(
-        WKBParser<way_conteiner, coords_preprocess>::read(wkb));
-    type_ = draw_type;
-}
+// template<class way_conteiner, class coords_preprocess, class ItemTypes>
+// class Feature
+// {
+//     using DBDT = db::DBStruct;
+
+//     public:
+//         void parse(const pqxx::row& feature)
+//         {
+//             idx_ = feature[DBDT::ID_COL].as<idx_t>();
+//             coordinates_ = std::move(
+//                 WKBParser<way_conteiner, coords_preprocess>::read(
+//                     feature[DBDT::TEXT_WAY_COL].c_str()));
+                    
+//             type_ = static_cast<ItemTypes>(feature[DBDT::DRAW_TYPE_COL].as<int>());
+//         }
+//         ItemTypes type() const
+//             { return type_; }
+        
+//         idx_t idx() const
+//             { return idx_; }
+//         const way_conteiner& coordinates() const
+//             { return coordinates_; }
+//         way_conteiner& coordinates()
+//             { return coordinates_; }
+
+//     private:
+
+//         ItemTypes type_;
+//         idx_t idx_;
+//         way_conteiner coordinates_;
+// };
+
 
 static void binaryPrint(const std::string& str)
 {
@@ -127,7 +178,8 @@ way_conteiner WKBParser<way_conteiner, coords_preprocess>::read(const char* text
 {
     std::stringstream ss(text);
     way_conteiner way;
-
+    
+    
     ss.ignore(128, '(');
     // while (ss.peek() != '(')
     //     ss.ignore(1);
@@ -144,6 +196,17 @@ way_conteiner WKBParser<way_conteiner, coords_preprocess>::read(const char* text
             break;
         ss.ignore(1);
     }
+
+    // std::string SSS(text);
+    // if (SSS.size() < 60)
+    // {
+    //     std::cout << SSS << "\n";
+    //     for (auto point : way)
+    //     {
+    //         std::cout << point.x() << ' ' << point.y() << ' ';
+    //     }
+    //     std::cout << "\n";
+    // }
 
     return way;
 }

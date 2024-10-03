@@ -8,7 +8,7 @@
 #include "types.h"
 
 
-namespace maykitbo::maps
+namespace maykitbo::maps::db
 {
 
 
@@ -20,6 +20,7 @@ class DBStruct
         inline const static std::string ID_COL = "osm_id";
         inline const static std::string TEXT_WAY_COL = "text_way";
         inline const static std::string WAY_COL = "way";
+        inline const static std::string BBOX_COL = "bbox";
         inline const static std::string WAY_AREA_COL = "way_area";
 
         // inline const static std::string WAY_AREA_COL = "way_area";
@@ -33,6 +34,10 @@ class DBStruct
 
         inline const static std::string POLYGON_TABLE = "planet_osm_polygon";
         inline const static std::string LINE_TABLE = "planet_osm_line";
+        inline const static std::string ROAD_TABLE = "planet_osm_roads";
+        inline const static std::string POINT_TABLE = "planet_osm_point";
+        inline const static std::string NODE_TABLE = "planet_osm_nodes";
+
 
         // inline static std::unordered_map<>
 
@@ -87,4 +92,4 @@ class DBStruct
 };
 
 
-} // namespace maykitbo::maps
+} // namespace maykitbo::maps::db

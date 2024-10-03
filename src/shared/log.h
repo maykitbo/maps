@@ -30,10 +30,10 @@ class Log<true>
         Log(const std::string& file_name)
         {
             log_file_.open("log/" + file_name, std::ios::out | std::ios::app);
-            if (!log_file_.is_open())
-            {
-                throw std::runtime_error("Unable to open log file");
-            }
+            // if (!log_file_.is_open())
+            // {
+            //     throw std::runtime_error("Unable to open log file");
+            // }
         }
 
         ~Log()
@@ -108,10 +108,11 @@ template<>
 class Log<false>
 {
     public:
+        Log() {}
         Log(const std::string& file_name) {}
 
         template<class T>
-        const Log<false> &operator<<(T m)
+        const Log<false> &operator<<(T m) const
         {
             return *this;
         }

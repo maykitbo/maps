@@ -10,17 +10,20 @@
 #include <nlohmann/json.hpp>
 
 #include "config.h"
-#include "postgis_connector.h"
+#include "connector.h"
 
 
-// ALTER TABLE planet_osm_polygon
-// ADD COLUMN draw_type INTEGER NOT NULL DEFAULT -1;
+// psql -U postgres
+// -c osm_db;
 
-// ALTER TABLE planet_osm_line
-// ADD COLUMN draw_type INTEGER NOT NULL DEFAULT -1;
+// ALTER TABLE planet_osm_polygon ADD COLUMN draw_type INTEGER NOT NULL DEFAULT -1;
+
+// ALTER TABLE planet_osm_line ADD COLUMN draw_type INTEGER NOT NULL DEFAULT -1;
+
+// "SELECT AddGeometryColumn('public', 'planet_osm_polygon', 'bbox', 4326, 'POLYGON', 2);"
 
 
-namespace maykitbo::maps
+namespace maykitbo::maps::db
 {
 
 
@@ -151,6 +154,53 @@ void printMappingTypes(const std::unordered_map<std::string, int>& mapping,
 }
 
 
+
+void updateBoundingBoxes(const std::string& table, int batch_size) {
+    pqxx::connection c(Conf::postgis);
+    pqxx::work w(c);
+
+    // Get the total number of rows to update
+    pqxx::result total_rows_result = w.exec("SELECT COUNT(*) FROM " + table + " WHERE way IS NOT NULL");
+    long long total_rows = total_rows_result[0][0].as<int>();
+
+    w.commit();
+
+    // Calculate the number of batches
+    long long num_batches = (total_rows + batch_size - 1) / batch_size;
+
+    std::cout << "Total rows = " << total_rows << "\t" << "num batches = " << num_batches << "\n";
+
+        // Prepare the update statement
+        c.prepare("update_bbox",
+            "UPDATE " + table + " SET bbox = ST_Transform(ST_Envelope(way), 4326) WHERE osm_id = $1");
+
+    for (long long batch = 0; batch < num_batches; ++batch) {
+        // Start a new transaction for each batch
+        pqxx::work work(c);
+
+        // Fetch a batch of IDs
+        pqxx::result ids = work.exec(
+            "SELECT osm_id FROM " + table + " WHERE way IS NOT NULL LIMIT " + 
+            std::to_string(batch_size) + " OFFSET " + std::to_string(batch * batch_size)
+        );
+
+        // Update each row in the batch
+        for (const auto& row : ids) {
+            long long id = row["osm_id"].as<long long>();
+            work.exec_prepared("update_bbox", id);
+        }
+
+        // Commit the batch transaction
+        work.commit();
+
+        // Print progress
+        std::cout << "Batch " << (batch + 1) << " of " << num_batches << " completed.\n";
+    }
+
+    std::cout << "Updated bounding boxes for " << total_rows << " rows.\n";
+}
+
+
 void realLines(const std::unordered_map<std::string, int>& mapping)
 {
     pqxx::connection c(Conf::postgis);
@@ -160,7 +210,7 @@ void realLines(const std::unordered_map<std::string, int>& mapping)
     pqxx::result r = w.exec(
         "SELECT osm_id, highway "
         "FROM planet_osm_line "
-        "WHERE highway IS NOT NULL AND highway is distinct from \'no\'");
+        "WHERE highway IS NOT NULL AND highway is distinct from \'no\' AND draw_type = -1");
     w.commit();
     std::cout << "SELECT done. Number of rows = " << r.size() << '\n';
 
@@ -207,12 +257,15 @@ void realLines(const std::unordered_map<std::string, int>& mapping)
 }
 
 
+// void 
+
+
 void realBuildings(const std::unordered_map<std::string, int>& mapping)
 {
     pqxx::connection c(Conf::postgis);
     pqxx::work w(c);
     pqxx::result r = w.exec(
-        "SELECT osm_id, building FROM planet_osm_polygon WHERE building IS NOT NULL");
+        "SELECT osm_id, building FROM planet_osm_polygon WHERE building IS NOT NULL AND draw_type = -1");
     w.commit();
 
     // Prepare update statement
@@ -256,6 +309,8 @@ void realBuildings(const std::unordered_map<std::string, int>& mapping)
 }
 
 
+
+
 void analise(const std::unordered_map<std::string, int>& mapping,
              const std::unordered_map<std::string, int>& types,
              const std::string& col,
@@ -269,27 +324,92 @@ void analise(const std::unordered_map<std::string, int>& mapping,
     w.commit();
 
     // std::unordered_set<std::string> set;
-    std::unordered_map<std::string, int> map;
+    std::unordered_map<std::string, int> unique_in_table;
 
-    // for (const auto& r : R)
-    // {
-    //     std::cout << r["name"].c_str() << '\n';
-    // }
-    // return;
+    for (const auto& r : R)
+    {
+        // std::cout << r[col].c_str() << '\n';
+        ++unique_in_table[r[col].c_str()];
+    }
 
+    std::cout << "UNIQUE VALUES IN TABLE\n";
+    for (const auto& m : unique_in_table)
+    {
+        std::cout << m.first << "\t" << m.second << "\n";
+    }
+
+
+
+    std::unordered_map<std::string, int> not_in_mapping;
     for (const auto& r : R)
     {
         if (mapping.find(r[col].c_str()) == mapping.end())
             // set.insert(r[col].c_str());
-            ++map[r[col].c_str()];
+            ++not_in_mapping[r[col].c_str()];
     }
 
-    for (const auto& s : map)
+    std::cout << "NOT FOUND IN MAPPING\n";
+    for (const auto& s : not_in_mapping)
     {
-        std::cout << s.first << "\t\t\t" << s.second << '\n';;
+        std::cout << s.first << "\t\t" << s.second << '\n';;
     }
+
+
+    std::cout << "\nFound in mapping\t" << mapping.size() - not_in_mapping.size() << "\n";
 
     std::cout << "size = " << R.size() << '\n';
+}
+
+
+void tuneMaster(const std::string& table,
+                const std::string& col,
+                const std::unordered_map<std::string, int>& mapping)
+{
+    pqxx::connection c(Conf::postgis);
+    pqxx::work w(c);
+    pqxx::result r = w.exec(
+        "SELECT osm_id, \"" + col + "\" FROM " + table + " WHERE draw_type < 0 AND \"" + col + "\" IS NOT NULL");
+    w.commit();
+
+
+    // Prepare update statement
+    c.prepare("update_draw_type", 
+        "UPDATE " + table + " SET draw_type = $1 WHERE osm_id = $2");
+
+    // Vector to store updates
+    std::vector<std::pair<int, int>> updates;
+
+    // Process each row
+    for (const auto& row : r)
+    {
+        int id = row["osm_id"].as<int>();
+        std::string natural = row[col].as<std::string>();
+
+
+        // Check if building type exists in mapping
+        if (mapping.find(natural) != mapping.end())
+        {
+            int drawType = mapping.find(natural)->second;
+            updates.push_back(std::make_pair(drawType, id));
+        }
+    }
+
+    std::cout << "updates size = " << updates.size() << '\n';
+    long long k = 0;
+    const long long batch = 50000;
+    // Perform batch update
+    for (const auto& update : updates)
+    {
+        if ((++k) % batch == 0)
+        {
+            std::cout << k << '/' << updates.size() << '\n';
+        }
+        w.exec_prepared("update_draw_type", update.first, update.second);
+    }
+
+    w.commit();
+
+    std::cout << "Updated " << updates.size() << " rows.\n";
 }
 
 

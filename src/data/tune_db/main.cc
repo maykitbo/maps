@@ -1,7 +1,11 @@
 #include "tune.h"
 
 
+#include "connector.h"
+#include "config.h"
+
 using namespace maykitbo::maps;
+using namespace db;
 
 /*
         0: osm_id
@@ -78,20 +82,39 @@ using namespace maykitbo::maps;
 
 int main()
 {
-    std::unordered_map<std::string, int> mapping;
-    std::unordered_map<std::string, int> types;
-
-    // auto tt = readPolygonMapping("src/data/tune_db/natural.ntoc");
-    // std::unordered_map<std::string, int> mapping =
-    //     std::move(tt.second);
-    // std::unordered_map<std::string, int> types =
-    //     std::move(tt.first);
+    // std::unordered_map<std::string, int> mapping;
+    // std::unordered_map<std::string, int> types;
+    
+    // analise(mapping, types, "highway", DBStruct::ROAD_TABLE);
 
 
-    // analise(mapping, types, "place", "planet_osm_polygon");
-    // realNatural(mapping);
-    createJson(DBStruct::POLYGON_TABLE);
+    // Connector pgc(Conf::postgis);
+    // pgc.executeQuery("ALTER TABLE planet_osm_roads ADD COLUMN draw_type INTEGER NOT NULL DEFAULT -1;");
 
+
+
+    auto tt = readPolygonMapping("src/data/tune_db/lines.ntoc");
+    std::unordered_map<std::string, int> mapping =
+        std::move(tt.second);
+    std::unordered_map<std::string, int> types =
+        std::move(tt.first);
+
+
+    // analise(mapping, types, "highway", DBStruct::ROAD_TABLE);
+
+
+    // // createJson(DBStruct::POLYGON_TABLE);
+
+
+    // auto tt2 = readPolygonMapping("src/data/tune_db/railway.ntoc");
+    // std::unordered_map<std::string, int> mapping2 =
+    //     std::move(tt2.second);
+
+    tuneMaster(DBStruct::ROAD_TABLE, "highway", mapping);
+
+
+
+    // updateBoundingBoxes(DBStruct::POLYGON_TABLE, 50000);
     
 
     return 0;

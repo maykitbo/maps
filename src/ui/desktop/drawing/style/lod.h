@@ -18,9 +18,29 @@ struct LoD
     {
         return
         {
-            bbox_area / 2000.0,
+            bbox_area / 300.0,
             bbox_area / 0.5
         };
+    }
+
+    static float sparse(coord_t bbox_area)
+    {
+        if (bbox_area > 5e8)
+            return 0.2;
+        else if (bbox_area > 2.5e8)
+            return 0.35;
+        else if (bbox_area > 1e8)
+            return 0.5;
+        else if (bbox_area > 1e7)
+            return 0.65;
+        else if (bbox_area > 6e6)
+            return 0.8;
+        return 1.0;
+    }
+
+    static bool points(coord_t bbox_area)
+    {
+        return bbox_area > 1e7;
     }
 
     static const inline std::unordered_map<LineTypes, int> lines =
