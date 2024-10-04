@@ -86,13 +86,19 @@ std::string Query::minDrawTypeCond(int min_draw_type)
 std::string Query::bboxWWayCond(const bbox_s& bbox)
 {
     return
+        // DBDT::WAY_COL +
+        // " && " +
+        // "ST_Transform("
+        //     "ST_MakeEnvelope(" +
+        //         bboxToQueryString(bbox) + ", " +
+        //         std::to_string(DBDT::SRID_OUT) +
+        //     "), " +
+        //     std::to_string(DBDT::SRID_IN) +
+        // ")";
         DBDT::WAY_COL +
         " && " +
-        "ST_Transform("
-            "ST_MakeEnvelope(" +
-                bboxToQueryString(bbox) + ", " +
-                std::to_string(DBDT::SRID_OUT) +
-            "), " +
+        "ST_MakeEnvelope(" +
+            bboxToQueryString(bbox) + ", " +
             std::to_string(DBDT::SRID_IN) +
         ")";
 }
@@ -121,6 +127,11 @@ std::string Query::bboxWBboxCond(const bbox_s& bbox)
             bboxToQueryString(bbox) + ", " +
             std::to_string(DBDT::SRID_OUT) +
         ")";
+}
+
+std::string Query::sizeOfWayInBytesCond(int threshold)
+{
+    return "ST_MemSize(" + DBDT::WAY_COL + ") > " + std::to_string(threshold);
 }
 
 //// ********* SELECT *************************************************************************

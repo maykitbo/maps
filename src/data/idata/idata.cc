@@ -111,6 +111,8 @@ PolygonSet IData::fetchPolygons(const bbox_s& bbox, const d_area_s& darea, float
     return fetchHelper<PolygonSet>(
         DBDT::POLYGON_TABLE,
         {
+            Q::wayAsInSridSelect(),
+
             // Q::wayColOutSelect(sparse_tol),
             Q::wayColOutSelect(),
             Q::columnsSelect({DBDT::DRAW_TYPE_COL, DBDT::ID_COL, DBDT::WAY_AREA_COL})
@@ -129,7 +131,9 @@ LineSet IData::fetchLines(const bbox_s& bbox, int min_draw_type, limit_t limit)
     return fetchHelper<LineSet>(
         DBDT::LINE_TABLE,
         {
-            Q::wayColOutSelect(),
+            // Q::wayColOutSelect(),
+            Q::wayAsInSridSelect(),
+
             Q::columnsSelect({DBDT::DRAW_TYPE_COL, DBDT::ID_COL})
         },
         {
@@ -146,7 +150,9 @@ PointSet IData::fetchPoints(const bbox_s& bbox, limit_t limit)
     return fetchHelper<PointSet>(
         DBDT::POINT_TABLE,
         {
-            Q::wayColOutSelect(),
+            // Q::wayColOutSelect(),
+            Q::wayAsInSridSelect(),
+
             Q::columnsSelect({DBDT::ID_COL})
         },
         {
@@ -162,12 +168,16 @@ RoadSet IData::fetchRoads(const bbox_s& bbox, int min_draw_type, limit_t limit)
     return fetchHelper<RoadSet>(
         DBDT::ROAD_TABLE,
         {
-            Q::wayColOutSelect(),
+            // Q::wayColOutSelect(),
+            Q::wayAsInSridSelect(),
+
             Q::columnsSelect({DBDT::DRAW_TYPE_COL, DBDT::ID_COL})
         },
         {
             Q::minDrawTypeCond(min_draw_type),
-            Q::bboxWWayCond(bbox)
+            Q::bboxWWayCond(bbox),
+
+            Q::sizeOfWayInBytesCond(128)
         },
         limit
     );

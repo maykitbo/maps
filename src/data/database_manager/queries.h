@@ -45,6 +45,7 @@ class Query
         static std::string bboxWWayCond(const bbox_s& bbox);
         static std::string bboxWWayAsBboxCond(const bbox_s& bbox);
         static std::string bboxWBboxCond(const bbox_s& bbox);
+        static std::string sizeOfWayInBytesCond(int threshold);
 
         static std::string select(const set_sw_t& conditions);
         static std::string columnsSelect(const set_sw_t& columns);

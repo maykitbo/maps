@@ -70,6 +70,15 @@ struct bbox_s {
     coord_t max_lon;
     coord_t min_lon;
 
+    point_s topRight()
+    {
+        return {max_lat, max_lon};
+    }
+    point_s buttomLeft()
+    {
+        return {min_lat, min_lon};
+    }
+
     void operator=(const bbox_s& other)
     {
         max_lat = other.max_lat;
@@ -86,6 +95,11 @@ struct bbox_s {
 
     bbox_s(coord_t top, coord_t buttom, coord_t right, coord_t left)
         : max_lat(top), min_lat(buttom), max_lon(right), min_lon(left) {}
+
+    bbox_s(point_s top_right, point_s buttom_left)
+        : max_lat(top_right.lat), min_lat(buttom_left.lat),
+          max_lon(top_right.lon), min_lon(buttom_left.lon) {}
+
     bbox_s() = default;
 };
 

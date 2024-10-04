@@ -79,10 +79,15 @@ void SceneSet::setDelta()
 
 void SceneSet::calcReals()
 {
-    real_width = GCS::ruler(point_s{bbox.max_lat, bbox.min_lon},
-                            point_s{bbox.max_lat, bbox.max_lon});
-    real_height = GCS::ruler(point_s{bbox.min_lat, bbox.min_lon},
-                             point_s{bbox.max_lat, bbox.min_lon});
+    // real_width = GCS::ruler3857( point_s{bbox.max_lat, bbox.min_lon},
+    //                              point_s{bbox.max_lat, bbox.max_lon});
+
+    // real_height = GCS::ruler3857(point_s{bbox.min_lat, bbox.min_lon},
+    //                              point_s{bbox.max_lat, bbox.min_lon});
+
+    real_width = bbox.max_lon - bbox.min_lon;
+    real_height = bbox.max_lat - bbox.min_lat;
+
     real_area = real_height * real_width;
 }
 
@@ -147,7 +152,7 @@ void SceneSet::bboxSeparation(std::function<void(const bbox_s&)> func) const
 void SceneSet::bboxSeparation(int depth, const bbox_s& bb, std::function<void(const bbox_s&)> func) const
 {
     // std::cout << "new bbox " << bbox << "\n";
-    if (depth > 0 && GCS::area(bb) > max_poly_bbox)
+    if (depth > 0 && GCS::area3857(bb) > max_poly_bbox)
     {
         coord_t mean_lat = bb.min_lat + (bb.max_lat - bb.min_lat) / 2.0;
         coord_t mean_lon = bb.min_lon + (bb.max_lon - bb.min_lon) / 2.0;

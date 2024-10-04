@@ -19,7 +19,20 @@ Scene::Scene(IData& data, QObject* parent) :
 
 void Scene::initMap()
 {   
-    set_.setBbox(style_.init_bbox);
+    bbox_s bbox = style_.init_bbox;
+    bbox = {GCS::epsg4326toEpsg3857(bbox.topRight()),
+            GCS::epsg4326toEpsg3857(bbox.buttomLeft())};
+    set_.setBbox(bbox);
+
+    std::cout << bbox << "\n";
+    std::cout << set_ << "\n\n\n";
+
+    // set_.setBbox(style_.init_bbox);
+    // std::cout << style_.init_bbox << "\n";
+    // std::cout << set_ << "\n";
+
+    // set_.setBbox(style_.init_bbox);
+
     set_.setRect(style_.init_width);
     setSceneRect(0, 0, set_.width, set_.height);
     set_.setScale();

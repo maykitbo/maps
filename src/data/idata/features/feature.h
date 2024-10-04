@@ -47,10 +47,9 @@ class Feature
             idx_ = feature[DBDT::ID_COL].as<idx_t>();
             coordinates_ = std::move(
                 WKBParser<Way, CPrep>::read(
-                    feature[DBDT::TEXT_WAY_COL].c_str()));
+                    feature[DBDT::PROJECTED_WAY].c_str()));
             parseOtherCols(feature);
         }
-        
 
         idx_t idx() const
             { return idx_; }
@@ -101,6 +100,15 @@ class PolygonFeature : public Feature<std::vector<point_s>, CoordPreprocess<poin
 
         void parseOtherCols(const pqxx::row& feature) override
         {
+            // std::cout << feature["raw_way"].c_str() << "\n";
+            // auto coords = WKBParser<std::vector<point_s>, CoordPreprocess<point_s>>::read(
+            //         feature["raw_way"].c_str());
+            // for (auto c : coords)
+            // {
+            //     std::cout << c.lat << ' ' << c.lon << "; ";
+            // }
+            // std::cout << "\n\n";
+
             type_ = static_cast<PolygonTypes>(feature[DBDT::DRAW_TYPE_COL].as<int>());
             way_area_ = feature[DBDT::WAY_AREA_COL].as<double>();
         }

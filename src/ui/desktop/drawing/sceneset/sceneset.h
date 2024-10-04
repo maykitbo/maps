@@ -58,14 +58,6 @@ struct SceneSet
         os << ss.bbox;
         os << "lat scale = " << ss.lat_scale << '\n';
         os << "lon scale = " << ss.lon_scale << '\n';
-        std::cout << "real width on the top = " <<
-                      GCS::ruler(point_s{ss.bbox.max_lat, ss.bbox.min_lon},
-                                 point_s{ss.bbox.max_lat, ss.bbox.max_lon}) <<
-                      " meters\n";
-        std::cout << "real width on the buttom = " <<
-                      GCS::ruler(point_s{ss.bbox.min_lat, ss.bbox.min_lon},
-                                 point_s{ss.bbox.min_lat, ss.bbox.max_lon}) <<
-                      " meters\n";
         std::cout << "real width = " << ss.real_width << " meters\n";
         std::cout << "real height = " << ss.real_height << " meters\n";
         return os;
