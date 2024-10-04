@@ -16,6 +16,7 @@ struct GCS
     static constexpr const coord_t r_earth = 6371000;// Radius of the Earth in meters
     static coord_t ruler(point_s a, point_s b);
     static coord_t toRadians(coord_t degree);
+    static coord_t area(const bbox_s& bbox);
 };
 
 

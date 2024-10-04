@@ -27,6 +27,14 @@ coord_t GCS::ruler(point_s a, point_s b)
 }
 
 
+coord_t GCS::area(const bbox_s& bbox)
+{
+    return ruler(point_s{bbox.max_lat, bbox.max_lon}, point_s{bbox.min_lat, bbox.max_lon}) *
+           ruler(point_s{bbox.max_lat, bbox.max_lon}, point_s{bbox.min_lat, bbox.max_lon});
+}
+
+
+
 coord_t GCS::toRadians(coord_t degree)
 {
     return degree * M_PI / 180.0;
