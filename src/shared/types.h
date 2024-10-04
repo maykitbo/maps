@@ -70,11 +70,20 @@ struct bbox_s {
     coord_t max_lon;
     coord_t min_lon;
 
+    void operator=(const bbox_s& other)
+    {
+        max_lat = other.max_lat;
+        min_lat = other.min_lat;
+        max_lon = other.max_lon;
+        min_lon = other.min_lon;
+    }
+
     friend std::ostream &operator<<(std::ostream& os, const bbox_s& b)
     {
         os << b.max_lat << ", " << b.min_lat << ", " << b.max_lon << ", " << b.min_lon;
         return os;
     }
+
     bbox_s(coord_t top, coord_t buttom, coord_t right, coord_t left)
         : max_lat(top), min_lat(buttom), max_lon(right), min_lon(left) {}
     bbox_s() = default;

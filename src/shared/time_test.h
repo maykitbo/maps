@@ -16,11 +16,19 @@ class TimeTest
         using time_p = std::chrono::_V2::system_clock::time_point;
         using dur_t = std::chrono::duration<float>;
 
-        TimeTest(std::string name = "Time Test") :
+        TimeTest(std::string name = "Time Test", bool defer = false) :
             point_(getTime()),
             period_{0},
-            name_(name)
+            name_(name),
+            defer_(defer)
         {}
+        ~TimeTest() {
+            if (defer_)
+            {
+                pause();
+                std::cout << *this;
+            }
+        }
         void stop()
         {
             period_ = dur_t{0};
@@ -50,6 +58,7 @@ class TimeTest
         time_p point_;
         dur_t period_;
         std::string name_;
+        bool defer_;
         time_p getTime() const
         {
             return std::chrono::high_resolution_clock::now();
