@@ -43,6 +43,7 @@ class Query
         static std::string dareaCond(d_area_s darea);
         static std::string minDrawTypeCond(int min_draw_type);
         static std::string bboxWWayCond(const bbox_s& bbox);
+        static std::string bboxWWayAsBboxCond(const bbox_s& bbox);
         static std::string bboxWBboxCond(const bbox_s& bbox);
 
         static std::string select(const set_sw_t& conditions);

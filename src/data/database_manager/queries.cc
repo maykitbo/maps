@@ -97,10 +97,25 @@ std::string Query::bboxWWayCond(const bbox_s& bbox)
         ")";
 }
 
+std::string Query::bboxWWayAsBboxCond(const bbox_s& bbox)
+{
+    return
+        "ST_Transform(ST_Envelope(" + DBDT::WAY_COL + "), 4326) "
+        // "ST_Envelope(" + DBDT::WAY_COL + ") "
+        " && " +
+        // "ST_Transform(" +
+            "ST_MakeEnvelope(" +
+                bboxToQueryString(bbox) + ", " +
+                std::to_string(DBDT::SRID_OUT) +
+            // "), " +
+            // std::to_string(DBDT::SRID_IN) +
+        ")";
+}
+
 std::string Query::bboxWBboxCond(const bbox_s& bbox)
 {
     return
-        DBDT::BBOX_COL +
+        "ST_Transform(" + DBDT::BBOX_COL + ", 4326)"
         " @ "
         "ST_MakeEnvelope(" +
             bboxToQueryString(bbox) + ", " +

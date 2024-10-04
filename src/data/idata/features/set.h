@@ -3,15 +3,18 @@
 
 
 #include "feature.h"
+#include "idata.h"
 #include "pqxx/pqxx"
 #include "structure.h"
+
+#include <set>
 
 
 namespace maykitbo::maps
 {
 
 
-template<class F>
+template<class Set, class F>
 class FeatureSetMeta
 {
     public:
@@ -20,47 +23,123 @@ class FeatureSetMeta
             data_.reserve(pqxx_data.size());
             for (const pqxx::row& feature : pqxx_data)
             {
-                data_.push_back(F{});                
-                data_.back().parse(feature);
+                // data_.push_back(F{});          
+                // data_.back().parse(feature);
+                F f{};
+                f.parse(feature);
+                data_.insert(std::move(f));
+                // insertFeature(feature);
             }
             auto i = data_.begin();
         }
 
-        typename std::vector<F>::iterator begin()
+        typename Set::iterator begin()
             { return data_.begin(); }
-        typename std::vector<F>::iterator end()
+        typename Set::iterator end()
             { return data_.end(); }
 
-        typename std::vector<F>::const_iterator begin() const
+        typename Set::const_iterator begin() const
             { return data_.cbegin(); }
-        typename std::vector<F>::const_iterator end() const
+        typename Set::const_iterator end() const
             { return data_.cend(); }
         
         size_t size() const
             { return data_.size(); }
-
-    private:
-        std::vector<F> data_;
+    
+    protected:
+        Set data_;
 };
 
 
-template<class way_container, class coords_preprocess>
-class FeatureSet :
-    public FeatureSetMeta<Feature<way_container, coords_preprocess>>
-{};
+struct PolygonComp
+{
+    bool operator()(const PolygonFeature& x, const PolygonFeature& y) const
+    {
+        return x.wayArea() > y.wayArea();
+    }
+};
 
 
-template<class way_container, class coords_preprocess, class ItemTypes>
-class DrawFeatureSet :
-    public FeatureSetMeta<DrawFeature<way_container, coords_preprocess, ItemTypes>>
-{};
+class PolygonSet : public FeatureSetMeta<std::set<PolygonFeature, PolygonComp>, PolygonFeature>
+{
+    public:
+        void parse(const pqxx::result& pqxx_data)
+        {
+            for (const pqxx::row& feature : pqxx_data)
+            {
+                PolygonFeature f{};
+                f.parse(feature);
+                data_.insert(std::move(f));
+            }
+            auto i = data_.begin();
+        }
+};
+
+class LineSet : public FeatureSetMeta<std::vector<LineFeature>, LineFeature>
+{
+    public:
+        void parse(const pqxx::result& pqxx_data)
+        {
+            data_.reserve(pqxx_data.size());
+            for (const pqxx::row& feature : pqxx_data)
+            {
+                data_.push_back(LineFeature{});          
+                data_.back().parse(feature);
+            }
+            auto i = data_.begin();
+        }
+};
+
+class RoadSet : public FeatureSetMeta<std::vector<RoadFeature>, RoadFeature>
+{
+    public:
+        void parse(const pqxx::result& pqxx_data)
+        {
+            data_.reserve(pqxx_data.size());
+            for (const pqxx::row& feature : pqxx_data)
+            {
+                data_.push_back(RoadFeature{});          
+                data_.back().parse(feature);
+            }
+            auto i = data_.begin();
+        }
+};
+
+class PointSet : public FeatureSetMeta<std::vector<PointFeature>, PointFeature>
+{
+    public:
+        void parse(const pqxx::result& pqxx_data)
+        {
+            data_.reserve(pqxx_data.size());
+            for (const pqxx::row& feature : pqxx_data)
+            {
+                data_.push_back(PointFeature{});          
+                data_.back().parse(feature);
+            }
+            auto i = data_.begin();
+        }
+};
 
 
-// template<class way_container, class coords_preprocess, class ItemTypes>
+
+
+// template<class Set>
+// class FeatureSet :
+//     public FeatureSetMeta<Set>
+// {};
+
+
+// template<class Set>
+// class DrawFeatureSet :
+//     public FeatureSetMeta<Set>
+// {};
+
+
+// template<class Way, class CPrep, class ItemTypes>
 // class FeatureSet
 // {
 //     private:
-//         using F = Feature<way_container, coords_preprocess, ItemTypes>;
+//         using F = Feature<Way, CPrep, ItemTypes>;
 //         std::vector<F> data_;
 
 //     public:
@@ -86,8 +165,8 @@ class DrawFeatureSet :
 
 
 // template
-// <class way_container, class coords_preprocess, class ItemTypes>
-// void FeatureSet<way_container, coords_preprocess, ItemTypes>
+// <class Way, class CPrep, class ItemTypes>
+// void FeatureSet<Way, CPrep, ItemTypes>
 // ::parse(const pqxx::result& pqxx_data)
 // {
 //     data_.reserve(pqxx_data.size());

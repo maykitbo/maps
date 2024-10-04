@@ -8,6 +8,7 @@
 
 #include "types.h"
 #include "structure.h"
+#include "idata.h"
 
 
 namespace maykitbo::maps
@@ -24,19 +25,20 @@ struct CoordPreprocess
 };
 
 
-template<class way_conteiner, class coords_preprocess>
+template<class Way, class CPrep>
 struct WKBParser
 {
-    static way_conteiner read(const char* text);
+    static Way read(const char* text);
 
-    static way_conteiner parse(const char* wkb);
+    static Way parse(const char* wkb);
 };
 
 
-template<class way_conteiner, class coords_preprocess>
+template<class Way, class CPrep>
 class Feature
 {
-    using DBDT = db::DBStruct;
+    protected:
+        using DBDT = db::DBStruct;
 
     public:
         // Feature() = default;
@@ -44,49 +46,105 @@ class Feature
         {
             idx_ = feature[DBDT::ID_COL].as<idx_t>();
             coordinates_ = std::move(
-                WKBParser<way_conteiner, coords_preprocess>::read(
+                WKBParser<Way, CPrep>::read(
                     feature[DBDT::TEXT_WAY_COL].c_str()));
+            parseOtherCols(feature);
         }
         
 
         idx_t idx() const
             { return idx_; }
-        const way_conteiner& coordinates() const
+        const Way& coordinates() const
             { return coordinates_; }
-        // way_conteiner& coordinates()
-        //     { return coordinates_; }
 
     protected:
+        virtual void parseOtherCols(const pqxx::row& feature) {}
 
         idx_t idx_;
-        way_conteiner coordinates_;
+        Way coordinates_;
 };
 
 
-template<class way_conteiner, class coords_preprocess, class ItemTypes>
-class DrawFeature : public Feature<way_conteiner, coords_preprocess>
+template<class ItemTypes>
+class DrawTypeFeature : public Feature<std::vector<point_s>, CoordPreprocess<point_s>>
 {
-    using DBDT = db::DBStruct;
-    using F =  Feature<way_conteiner, coords_preprocess>;
     public:
-        void parse(const pqxx::row& feature)
-        {
-            F::idx_ = feature[DBDT::ID_COL].as<idx_t>();
-            F::coordinates_ = std::move(
-                WKBParser<way_conteiner, coords_preprocess>::read(
-                    feature[DBDT::TEXT_WAY_COL].c_str()));
-            type_ = static_cast<ItemTypes>(feature[DBDT::DRAW_TYPE_COL].as<int>());
-        }
-
         ItemTypes type() const
             { return type_; }
 
     private:
         ItemTypes type_;
+
+        void parseOtherCols(const pqxx::row& feature) override
+        {
+            type_ = static_cast<ItemTypes>(feature[DBDT::DRAW_TYPE_COL].as<int>());
+        }
 };
 
 
-// template<class way_conteiner, class coords_preprocess, class ItemTypes>
+class LineFeature : public DrawTypeFeature<LineTypes> {};
+
+class RoadFeature : public DrawTypeFeature<LineTypes> {};
+
+class PointFeature : public Feature<std::vector<point_s>, CoordPreprocess<point_s>> {};
+
+
+
+class PolygonFeature : public Feature<std::vector<point_s>, CoordPreprocess<point_s>>
+{
+    public:
+        coord_t wayArea() const { return way_area_; }
+        PolygonTypes type() const { return type_; }
+    private:
+        PolygonTypes type_;
+        coord_t way_area_;
+
+        void parseOtherCols(const pqxx::row& feature) override
+        {
+            type_ = static_cast<PolygonTypes>(feature[DBDT::DRAW_TYPE_COL].as<int>());
+            way_area_ = feature[DBDT::WAY_AREA_COL].as<double>();
+        }
+};
+
+
+
+// class LineFeature : public Feature<std::vector<point_s>, CoordPreprocess<point_s>>
+// {
+//     private:
+//         PolygonTypes type_;
+
+//         void parseOtherCols(const pqxx::row& feature) override
+//         {
+//             type_ = static_cast<PolygonTypes>(feature[DBDT::DRAW_TYPE_COL].as<int>());
+//             way_area_ = feature[DBDT::WAY_AREA_COL].as<double>();
+//         }
+// };
+
+
+// template<class Way, class CPrep, class ItemTypes>
+// class DrawFeature : public Feature<Way, CPrep>
+// {
+//     using DBDT = db::DBStruct;
+//     using F =  Feature<Way, CPrep>;
+//     public:
+//         void parse(const pqxx::row& feature)
+//         {
+//             F::idx_ = feature[DBDT::ID_COL].as<idx_t>();
+//             F::coordinates_ = std::move(
+//                 WKBParser<Way, CPrep>::read(
+//                     feature[DBDT::TEXT_WAY_COL].c_str()));
+//             type_ = static_cast<ItemTypes>(feature[DBDT::DRAW_TYPE_COL].as<int>());
+//         }
+
+//         ItemTypes type() const
+//             { return type_; }
+
+//     private:
+//         ItemTypes type_;
+// };
+
+
+// template<class Way, class CPrep, class ItemTypes>
 // class Feature
 // {
 //     using DBDT = db::DBStruct;
@@ -96,7 +154,7 @@ class DrawFeature : public Feature<way_conteiner, coords_preprocess>
 //         {
 //             idx_ = feature[DBDT::ID_COL].as<idx_t>();
 //             coordinates_ = std::move(
-//                 WKBParser<way_conteiner, coords_preprocess>::read(
+//                 WKBParser<Way, CPrep>::read(
 //                     feature[DBDT::TEXT_WAY_COL].c_str()));
                     
 //             type_ = static_cast<ItemTypes>(feature[DBDT::DRAW_TYPE_COL].as<int>());
@@ -106,16 +164,16 @@ class DrawFeature : public Feature<way_conteiner, coords_preprocess>
         
 //         idx_t idx() const
 //             { return idx_; }
-//         const way_conteiner& coordinates() const
+//         const Way& coordinates() const
 //             { return coordinates_; }
-//         way_conteiner& coordinates()
+//         Way& coordinates()
 //             { return coordinates_; }
 
 //     private:
 
 //         ItemTypes type_;
 //         idx_t idx_;
-//         way_conteiner coordinates_;
+//         Way coordinates_;
 // };
 
 
@@ -132,12 +190,12 @@ static void binaryPrint(const std::string& str)
     std::cout << '\n';
 }
 
-template<class way_conteiner, class coords_preprocess>
-way_conteiner WKBParser<way_conteiner, coords_preprocess>::parse(const char* wkb)
+template<class Way, class CPrep>
+Way WKBParser<Way, CPrep>::parse(const char* wkb)
 {
     static const u_int8_t SIZE_IDX = 13;
 
-    way_conteiner coordinates;
+    Way coordinates;
     
     u_int32_t size = 0;
     for (u_int8_t k = 2 * (SIZE_IDX + sizeof(u_int32_t) - 1), i = 3;
@@ -163,7 +221,7 @@ way_conteiner WKBParser<way_conteiner, coords_preprocess>::parse(const char* wkb
                 wkb + 2 * ((SIZE_IDX + 4) + k * pair_len + i),
                 "%2hhx", binary_data + i);
         }
-        coordinates[k] = coords_preprocess::act(
+        coordinates[k] = CPrep::act(
             *reinterpret_cast<double*>(binary_data + sizeof(double)),
             *reinterpret_cast<double*>(binary_data)
         );
@@ -173,11 +231,11 @@ way_conteiner WKBParser<way_conteiner, coords_preprocess>::parse(const char* wkb
 }
 
 
-template<class way_conteiner, class coords_preprocess>
-way_conteiner WKBParser<way_conteiner, coords_preprocess>::read(const char* text)
+template<class Way, class CPrep>
+Way WKBParser<Way, CPrep>::read(const char* text)
 {
     std::stringstream ss(text);
-    way_conteiner way;
+    Way way;
     
     
     ss.ignore(128, '(');
@@ -191,7 +249,7 @@ way_conteiner WKBParser<way_conteiner, coords_preprocess>::read(const char* text
         double lat, lon;
         ss >> lon;
         ss >> lat;
-        way.push_back(coords_preprocess::act(lat, lon));
+        way.push_back(CPrep::act(lat, lon));
         if (ss.peek() == ')')
             break;
         ss.ignore(1);

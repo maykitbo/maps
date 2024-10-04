@@ -11,6 +11,7 @@
 
 #include <unordered_map>
 #include <list>
+#include <functional>
 
 
 namespace maykitbo::maps
@@ -25,24 +26,16 @@ class IData
     public:
         using limit_t = unsigned long long;
 
+        using coordinates_t = std::vector<point_s>;
+
         IData(const std::string& conn_str);
 
         // 1.0 >= sparse tol >= 0.0
-        template<class Way, class CPrep>
-        DrawFeatureSet<Way, CPrep, PolygonTypes>
-        fetchPolygons(const bbox_s& bbox, const d_area_s& darea, float sparse_tol, limit_t limit = 10000) const;
 
-        template<class Way, class CPrep>
-        DrawFeatureSet<Way, CPrep, LineTypes>
-        fetchLines(const bbox_s& bbox, int min_draw_type, limit_t limit = 10000) const;
-
-        template<class Way, class CPrep>
-        FeatureSet<Way, CPrep>
-        fetchPoints(const bbox_s& bbox, limit_t limit = 10000) const;
-
-        template<class Way, class CPrep>
-        DrawFeatureSet<Way, CPrep, LineTypes>
-        fetchRoads(const bbox_s& bbox, int min_draw_type, limit_t limit = 10000) const;
+        PolygonSet fetchPolygons(const bbox_s& bbox, const d_area_s& darea, float sparse_tol, limit_t limit = 100000);
+        LineSet fetchLines(const bbox_s& bbox, int min_draw_type, limit_t limit = 100000);
+        PointSet fetchPoints(const bbox_s& bbox, limit_t limit = 100000);
+        RoadSet fetchRoads(const bbox_s& bbox, int min_draw_type, limit_t limit = 100000);
 
         const db::Connector& connector();
         
@@ -57,12 +50,17 @@ class IData
     private:
         db::Connector pgc_;
 
+        // const coord_t max_poly_bbox = 2e8;
+        // void bboxSeparation(int depth, const bbox_s& bbox, std::function<void(const bbox_s&)> func);
 
-        template<class Way, class CPrep, class return_type>
-        return_type fetchHelper(const std::string& table,
-                                const Q::set_sw_t& s,
-                                const Q::set_sw_t& w,
-                                limit_t limit) const;
+        bbox_s bbox_;
+
+        // template<class Way, class CPrep, class return_type>
+        template<class Set>
+        Set fetchHelper(const std::string& table,
+                        const Q::set_sw_t& s,
+                        const Q::set_sw_t& w,
+                        limit_t limit);
  
 
 };
@@ -73,105 +71,31 @@ class IData
 
 // }
 
-
-template<class Way, class CPrep, class return_type>
-return_type IData::fetchHelper(const std::string& table,
-                               const Q::set_sw_t& s,
-                               const Q::set_sw_t& w,
-                               limit_t limit) const
+template<class Set>
+// template<class Way, class CPrep, class return_type>
+Set IData::fetchHelper( const std::string& table,
+                        const Q::set_sw_t& s,
+                        const Q::set_sw_t& w,
+                        limit_t limit)
 {
-    std::cout << "Idata::fetch start " << table << "\n";
+    // std::cout << "Idata::fetch start " << table << "\n";
 
-    TimeTest fetch_time("Fetch in idata " + table);
+    // TimeTest fetch_time("Fetch in idata " + table);
     pqxx::result R = pgc_.fetch(table, s, w, limit);
-    fetch_time.pause();
+    // fetch_time.pause();
     
     TimeTest parse_time("Parse in idata"  + table);
-    return_type set;
+    Set set;
     set.parse(R);
     parse_time.pause();
 
-    std::cout << fetch_time << parse_time;
+    // std::cout << fetch_time << parse_time;
 
-    std::cout << "Idata::fetch done " << table << "\n";
+    // std::cout << "Idata::fetch done " << table << "\n";
 
     return set;
 }
 
-
-template<class Way, class CPrep>
-DrawFeatureSet<Way, CPrep, PolygonTypes>
-IData::fetchPolygons(const bbox_s& bbox, const d_area_s& darea, float sparse_tol, limit_t limit) const
-{
-    return fetchHelper<Way, CPrep, DrawFeatureSet<Way, CPrep, PolygonTypes>>(
-        DBDT::POLYGON_TABLE,
-        {
-            Q::wayColOutSelect(sparse_tol),
-            Q::columnsSelect({DBDT::DRAW_TYPE_COL, DBDT::ID_COL})
-        },
-        {
-            Q::dareaCond(darea),
-            Q::bboxWWayCond(bbox)
-        },
-        limit
-    );
-}
-
-
-template<class Way, class CPrep>
-DrawFeatureSet<Way, CPrep, LineTypes>
-IData::fetchLines(const bbox_s& bbox, int min_draw_type, limit_t limit) const
-{
-    return fetchHelper<Way, CPrep, DrawFeatureSet<Way, CPrep, LineTypes>>(
-        DBDT::LINE_TABLE,
-        {
-            Q::wayColOutSelect(),
-            Q::columnsSelect({DBDT::DRAW_TYPE_COL, DBDT::ID_COL})
-        },
-        {
-            Q::minDrawTypeCond(min_draw_type),
-            Q::bboxWWayCond(bbox)
-        },
-        limit
-    );
-}
-
-
-template<class Way, class CPrep>
-FeatureSet<Way, CPrep>
-IData::fetchPoints(const bbox_s& bbox, limit_t limit) const
-{
-    return fetchHelper<Way, CPrep, FeatureSet<Way, CPrep>>(
-        DBDT::POINT_TABLE,
-        {
-            Q::wayColOutSelect(),
-            Q::columnsSelect({DBDT::ID_COL})
-        },
-        {
-            Q::bboxWWayCond(bbox)
-        },
-        limit
-    );
-}
-
-
-template<class Way, class CPrep>
-DrawFeatureSet<Way, CPrep, LineTypes>
-IData::fetchRoads(const bbox_s& bbox, int min_draw_type, limit_t limit) const
-{
-    return fetchHelper<Way, CPrep, DrawFeatureSet<Way, CPrep, LineTypes>>(
-        DBDT::ROAD_TABLE,
-        {
-            Q::wayColOutSelect(),
-            Q::columnsSelect({DBDT::DRAW_TYPE_COL, DBDT::ID_COL})
-        },
-        {
-            Q::minDrawTypeCond(min_draw_type),
-            Q::bboxWWayCond(bbox)
-        },
-        limit
-    );
-}
 
 
 } // namespace maykitbo::maps

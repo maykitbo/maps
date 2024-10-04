@@ -15,7 +15,6 @@ set(TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
 set(TUNE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tune_db)
 
-
 set(SOURCES
     ${DATA_MANAGER_DIR}/connector.cc
     ${DATA_MANAGER_DIR}/connector.h

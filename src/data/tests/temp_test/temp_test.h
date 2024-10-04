@@ -30,14 +30,14 @@ void polyRequestTimeTest(float tol)
     db::Connector pgc(Conf::postgis);
 
     maykitbo::TimeTest tt("db request");
-    auto R = pgc.fetchBbox(db::DBStruct::POLYGON_TABLE,
-                        {56.053, 55.572, 38.4119, 36.9001},
-                        100000,
-                        db::Query::wayColOutTransform(tol),
-                        {db::DBStruct::DRAW_TYPE_COL},
-                        {db::Query::dareaCondition(maxMinArea(5.02119e+09))});
+    // auto R = pgc.fetchBbox(db::DBStruct::POLYGON_TABLE,
+    //                     {56.053, 55.572, 38.4119, 36.9001},
+    //                     100000,
+    //                     db::Query::wayColOutTransform(tol),
+    //                     {db::DBStruct::DRAW_TYPE_COL},
+    //                     {db::Query::dareaCondition(maxMinArea(5.02119e+09))});
     tt.pause();
-    std::cout << "tol = " << tol << "\n\t" << tt << "\tsize = " << R.size() << "\n";
+    // std::cout << "tol = " << tol << "\n\t" << tt << "\tsize = " << R.size() << "\n";
 }
 
 
