@@ -22,6 +22,14 @@
 
 // "SELECT AddGeometryColumn('public', 'planet_osm_polygon', 'bbox', 4326, 'POLYGON', 2);"
 
+/*
+-- Create a B-tree index on the way_area column
+CREATE INDEX idx_way_area ON planet_osm_polygon (way_area);
+
+-- Analyze the table to update statistics
+ANALYZE planet_osm_polygon;
+*/
+
 
 namespace maykitbo::maps::db
 {

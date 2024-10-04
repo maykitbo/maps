@@ -93,11 +93,11 @@ int main()
 
 
 
-    auto tt = readPolygonMapping("src/data/tune_db/lines.ntoc");
-    std::unordered_map<std::string, int> mapping =
-        std::move(tt.second);
-    std::unordered_map<std::string, int> types =
-        std::move(tt.first);
+    // auto tt = readPolygonMapping("src/data/tune_db/lines.ntoc");
+    // std::unordered_map<std::string, int> mapping =
+    //     std::move(tt.second);
+    // std::unordered_map<std::string, int> types =
+    //     std::move(tt.first);
 
 
     // analise(mapping, types, "highway", DBStruct::ROAD_TABLE);
@@ -110,12 +110,25 @@ int main()
     // std::unordered_map<std::string, int> mapping2 =
     //     std::move(tt2.second);
 
-    tuneMaster(DBStruct::ROAD_TABLE, "highway", mapping);
+    // tuneMaster(DBStruct::ROAD_TABLE, "highway", mapping);
 
 
 
     // updateBoundingBoxes(DBStruct::POLYGON_TABLE, 50000);
     
+
+    Connector pgc(Conf::postgis);
+    auto R = pgc.executeQuery("CREATE INDEX idx_way_area ON planet_osm_polygon (way_area); "
+                     "ANALYZE planet_osm_polygon;");
+    
+    std::cout << R.size() << "\n";
+    for (auto C : R)
+    {
+        for (auto F : C)
+        {
+            std::cout << F.name() << "\t" << F.c_str() << "\n";
+        }
+    }
 
     return 0;
 }
