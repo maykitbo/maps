@@ -22,6 +22,7 @@ class DBStruct
         inline const static std::string WAY_COL = "way";
         inline const static std::string BBOX_COL = "bbox";
         inline const static std::string WAY_AREA_COL = "way_area";
+        inline const static std::string PROJECTED_WAY = "projected_way";
 
         // inline const static std::string WAY_AREA_COL = "way_area";
         // inline const static std::string WAY_AREA_COL = "way_area";

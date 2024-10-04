@@ -50,7 +50,7 @@ class Query
         static std::string columnsSelect(const set_sw_t& columns);
         static std::string wayColOutSelect();
         static std::string wayColOutSelect(float simplify_epsilon);
-
+        static std::string wayAsInSridSelect();
 
 
 

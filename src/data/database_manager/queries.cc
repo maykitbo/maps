@@ -121,13 +121,6 @@ std::string Query::bboxWBboxCond(const bbox_s& bbox)
             bboxToQueryString(bbox) + ", " +
             std::to_string(DBDT::SRID_OUT) +
         ")";
-        // "ST_Intersects("
-        //     "ST_MakeEnvelope(" +
-        //         bboxToQueryString(bbox) + ", " +
-        //         std::to_string(DBDT::SRID_OUT) +
-        //     "), " +
-        //     DBDT::BBOX_COL +
-        // ")";
 }
 
 //// ********* SELECT *************************************************************************
@@ -142,6 +135,15 @@ std::string Query::wayColOutSelect()
                 std::to_string(DBDT::SRID_OUT) +
             ")"
         ") AS " + DBDT::TEXT_WAY_COL;
+}
+
+std::string Query::wayAsInSridSelect()
+{
+    return
+        "ST_AsText(" +
+            DBDT::WAY_COL +
+        ") AS " + DBDT::PROJECTED_WAY;
+
 }
 
 std::string Query::wayColOutSelect(float simplify_epsilon)
@@ -159,14 +161,6 @@ std::string Query::wayColOutSelect(float simplify_epsilon)
 
 std::string Query::columnsSelect(const std::vector<std::string>& columns)
 {
-//     std::string res = "";
-//     for (size_t k = 0; k < columns.size() - 1; ++k)
-//     {
-//         res += columns[k] + ", ";
-//     }
-//     if (columns.size())
-//         res += columns.back();
-//     return res;
     return flat(columns, ", ");
 }
 
@@ -209,34 +203,3 @@ std::string Query::fetch(const std::string& table,
         " WHERE " + where(w) +
         " LIMIT " + std::to_string(limit) + ";";
 }
-
-
-// std::string Query::bbox(const std::string& table,
-//                         const bbox_s& bbox,
-//                         int limit,
-//                         const std::string &out_tranform,
-//                         const std::vector<std::string>& columns,
-//                         const std::vector<std::string>& conditions)
-// {
-//     return
-//         "SELECT " + 
-//             DBDT::ID_COL +
-
-//             ", " + out_tranform +
-            
-//             (columns.size() > 0 ? ", " + columnsToString(columns) : "") +
-
-//         " FROM " + table +
-//         " WHERE " +
-//             (conditions.size() > 0 ? conditionsToString(conditions) + " AND " : "") +
-
-//             DBDT::WAY_COL + " && ST_Transform("
-//                 "ST_MakeEnvelope(" +
-//                     bboxToQueryString(bbox) + ", " +
-//                     std::to_string(DBDT::SRID_OUT) +
-//                 "), " +
-//                 std::to_string(DBDT::SRID_IN) +
-//             ")" +
-            
-//         " LIMIT " + std::to_string(limit) + ";";
-// }
