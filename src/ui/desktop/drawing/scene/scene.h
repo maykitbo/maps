@@ -10,13 +10,15 @@
 #include <QGraphicsSceneMouseEvent>
 
 #include <unordered_set>
-// #include <QGraphicsLineItem>
+#include <set>
 
 #include "idata/idata.h"
 #include "sceneset.h"
 #include "map_style.h"
 #include "lod.h"
 #include "mapitems.h"
+#include "render.h"
+#include "dataloader.h"
 
 #include "time_test.h"
 
@@ -30,7 +32,10 @@ class Scene : public QGraphicsScene
     Q_OBJECT
 
     public:
-        Scene(const IData& data, QObject* parent = nullptr);
+        Scene(IData& data, QObject* parent = nullptr);
+
+        // SceneSet& set() { return set_; }
+        // MapStyle& style() { return style_; }
 
     public slots:
         void initMap();
@@ -40,69 +45,56 @@ class Scene : public QGraphicsScene
         void moveDown();
         void scrollCloser();
         void scrollAway();
-        
-    
-    protected:
-        class QPointFPreprocess;
 
+        void addPolygonItem(PolygonItem* item);
+        void addLineItem(LineItem* item);
+        void addRoadItem(RoadItem* item);
+        void addPointItem(PointItem* item);
+    
+    signals:
+        void draw();
+
+    protected:
         SceneSet set_;
         MapStyle style_;
+
         MapItem* route_start_{nullptr};
         MapItem* route_end_{nullptr};
 
-        const IData& data_;
+        Render render_;
+        DataLoader data_loader_;
 
-        using PolygonSet = decltype(
-            data_.fetchPolygons<QPolygonF, QPointFPreprocess>(
-                bbox_s{}, d_area_s{}, 0));
-        
-        using LineSet = decltype(
-            data_.fetchLines<QPolygonF, QPointFPreprocess>(
-                bbox_s{}, 0, 0));
+        IData& data_;
 
-        using RoadSet = decltype(
-            data_.fetchRoads<QPolygonF, QPointFPreprocess>(
-                bbox_s{}, 0, 0));
-
-        using PointSet = decltype(
-            data_.fetchPoints<std::vector<QPointF>, QPointFPreprocess>(
-                bbox_s{}, 0));
-
-        void drawMap();
 
         void move(coord_t x, coord_t y);
         void scroll(coord_t v);
 
-        void adapt(QPolygonF& polygon);
-
-        void drawPolygons(const PolygonSet& set);
-        void drawLines(const LineSet& set);
-        void drawPoints(const PointSet& set);
-        void drawRoads(const RoadSet& set);
+        void connectRenderLoader();
+        void connectSceneLoader();
+        void connectRenderScene();
 
         void connectRouteKey(MapItem* item);
+
         void connectPolygonInfo(MapItem* item);
         void connectLineInfo(MapItem* item);
         void connectPointInfo(MapItem* item);
         void connectRoadInfo(MapItem* item);
+
         void press(MapItem* item, MapItem** point);
         void unPress(MapItem** point);
-
-        // void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
-        // bool sceneEventFilter(QGraphicsItem *watched, QEvent *event) override;
-        // bool eventFilter(QObject *watched, QEvent *event) override;
 };
 
 
 
-struct Scene::QPointFPreprocess
-{
-    static QPointF act(double lat, double lon)
-    {
-        // return Scene::set_.adaptPoint(lat, lon);
-        return QPointF{lon, lat};
-    }
-};
+// struct Scene::QPointFPreprocess
+// {
+//     static QPointF act(double lat, double lon)
+//     {
+//         // return Scene::set_.adaptPoint(lat, lon);
+//         return QPointF{lon, lat};
+//     }
+// };
 
 
 // template<class Item, class Func>

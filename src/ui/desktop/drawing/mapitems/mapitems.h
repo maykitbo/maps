@@ -78,9 +78,10 @@ class LineItem : public PenMapItem, public QGraphicsPathItem
         void undoHighlight() override;
     
     protected:
-        QPainterPath shape() const override {
+        QPainterPath shape() const override
+        {
             QPainterPathStroker stroker;
-            stroker.setWidth(2.0); // Adjust the width as needed
+            stroker.setWidth(2.0);
             return stroker.createStroke(path());
         }
 
@@ -127,6 +128,8 @@ class PointItem : public BrushMapItem, public QGraphicsEllipseItem
         void mousePressEvent(QGraphicsSceneMouseEvent *event) override
             { mousePress(event); }
 };
+
+typedef LineItem RoadItem;
 
 
 } // namespace maykitbo::maps

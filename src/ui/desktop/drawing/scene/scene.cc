@@ -3,18 +3,17 @@
 
 using namespace maykitbo::maps;
 
-
-#define _DRAW_FUNC_ drawMap
-
-
-Scene::Scene(const IData& data, QObject* parent) :
+Scene::Scene(IData& data, QObject* parent) :
     QGraphicsScene(parent),
-    data_(data)
+    data_(data),
+    render_(set_, style_),
+    data_loader_(set_, data)
 {
-    // db_time_.pause();
-    // draw_time_.pause();
-
     installEventFilter(parent);
+
+    connectRenderLoader();
+    connectRenderScene();
+    connectSceneLoader();
 }
 
 
@@ -27,8 +26,7 @@ void Scene::initMap()
 
     // std::cout << set_;
 
-    _DRAW_FUNC_();
-
+    emit draw();
 }
 
 
@@ -36,7 +34,9 @@ void Scene::move(coord_t x, coord_t y)
 {
     set_.move(x * style_.move_procent,
               y * style_.move_procent);
-    _DRAW_FUNC_();
+
+    clear();
+    emit draw();
 }
 
 
@@ -67,7 +67,9 @@ void Scene::moveDown()
 void Scene::scroll(coord_t v)
 {
     set_.scroll(v * style_.scroll_procent);
-    _DRAW_FUNC_();
+    
+    clear();
+    emit draw();
 }
 
 
@@ -83,11 +85,32 @@ void Scene::scrollAway()
 }
 
 
-void Scene::adapt(QPolygonF& polygon)
+void Scene::addPolygonItem(PolygonItem* item)
 {
-    for (auto& point : polygon)
-    {
-        point = set_.adaptPoint(point);
-    }
+    connectPolygonInfo(item);
+    connectRouteKey(item);
+    addItem(item);
+}
+
+
+void Scene::addLineItem(LineItem* item)
+{
+    connectLineInfo(item);
+    addItem(item);
+}
+
+
+void Scene::addRoadItem(RoadItem* item)
+{
+    connectRoadInfo(item);
+    addItem(item);
+}
+
+
+void Scene::addPointItem(PointItem* item)
+{
+    connectPointInfo(item);
+    connectRouteKey(item);
+    addItem(item);
 }
 

@@ -2,9 +2,12 @@
 
 
 #include <QPointF>
+#include <functional>
+#include <QPolygonF>
 
 #include "types.h"
 #include "gcs.h"
+#include "idata/idata.h"
 
 
 namespace maykitbo::maps
@@ -13,6 +16,9 @@ namespace maykitbo::maps
 
 struct SceneSet
 {
+    static constexpr const coord_t max_poly_bbox = 2e8;
+    static const int bbox_sep_depth = 0;
+
     coord_t width;
     coord_t height;
     coord_t real_width;
@@ -23,9 +29,13 @@ struct SceneSet
     coord_t lat_scale;
     coord_t delta_lat;
     coord_t delta_lon;
+
     QPointF adaptPoint(point_s point) const;
     QPointF adaptPoint(QPointF point) const;
     QPointF adaptPoint(coord_t lat, coord_t lon) const;
+    void adapt(QPolygonF& polygon) const;
+    QPolygonF adapt(const IData::coordinates_t& way) const;
+
     void setScale();
     void setRect(int width);
     void setBbox(const bbox_s& bbox);
@@ -34,6 +44,10 @@ struct SceneSet
     std::pair<bbox_s, bbox_s> halfBbox();
     void setDelta();
     void calcReals();
+
+    void bboxSeparation(std::function<void(const bbox_s&)> func) const;
+    void bboxSeparation(int depth, const bbox_s& bbox, std::function<void(const bbox_s&)> func) const;
+
 
     friend std::ostream& operator<<(std::ostream& os, const SceneSet& ss)
     {
@@ -56,6 +70,9 @@ struct SceneSet
         std::cout << "real height = " << ss.real_height << " meters\n";
         return os;
     }
+
+    // signals:
+
 };
 
 

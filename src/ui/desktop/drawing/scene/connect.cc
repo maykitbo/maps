@@ -4,6 +4,45 @@
 using namespace maykitbo::maps;
 
 
+void Scene::connectRenderLoader()
+{
+    connect(&data_loader_, &DataLoader::polygonDataReady,
+            &render_,      &Render::drawPolygons);
+    
+    connect(&data_loader_, &DataLoader::lineDataReady,
+            &render_,      &Render::drawLines);
+    
+    connect(&data_loader_, &DataLoader::roadDataReady,
+            &render_,      &Render::drawRoads);
+    
+    connect(&data_loader_, &DataLoader::pointDataReady,
+            &render_,      &Render::drawPoints);
+}
+
+
+void Scene::connectSceneLoader()
+{
+    connect(this,          &Scene::draw,
+            &data_loader_, &DataLoader::allTypes);
+}
+
+
+void Scene::connectRenderScene()
+{
+    connect(&render_, &Render::polygonItemReady,
+            this,     &Scene::addPolygonItem);
+    
+    connect(&render_, &Render::roadItemReady,
+            this,     &Scene::addRoadItem);
+    
+    connect(&render_, &Render::lineItemReady,
+            this,     &Scene::addLineItem);
+    
+    connect(&render_, &Render::pointItemReady,
+            this,     &Scene::addPointItem);
+}
+
+
 void Scene::connectPolygonInfo(MapItem* item)
 {
     connect(item, &PolygonItem::showInfo, [&, id = item->idx()] {

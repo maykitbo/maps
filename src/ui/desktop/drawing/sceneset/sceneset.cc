@@ -42,6 +42,26 @@ QPointF SceneSet::adaptPoint(coord_t lat, coord_t lon) const
 }
 
 
+void SceneSet::adapt(QPolygonF& polygon) const
+{
+    for (auto& point : polygon)
+    {
+        point = adaptPoint(point);
+    }
+}
+
+
+QPolygonF SceneSet::adapt(const IData::coordinates_t& way) const
+{
+    QPolygonF polygon;
+    for (const auto& point : way)
+    {
+        polygon.push_back(adaptPoint(point));
+    }
+    return polygon;
+}
+
+
 
 void SceneSet::setRect(int w)
 {
@@ -115,4 +135,29 @@ std::pair<bbox_s, bbox_s> SceneSet::halfBbox()
             bbox.min_lon
         }
     };
+}
+
+
+void SceneSet::bboxSeparation(std::function<void(const bbox_s&)> func) const
+{
+    bboxSeparation(bbox_sep_depth, bbox, func);
+}
+
+
+void SceneSet::bboxSeparation(int depth, const bbox_s& bb, std::function<void(const bbox_s&)> func) const
+{
+    // std::cout << "new bbox " << bbox << "\n";
+    if (depth > 0 && GCS::area(bb) > max_poly_bbox)
+    {
+        coord_t mean_lat = bb.min_lat + (bb.max_lat - bb.min_lat) / 2.0;
+        coord_t mean_lon = bb.min_lon + (bb.max_lon - bb.min_lon) / 2.0;
+        bboxSeparation(depth - 1, {bb.max_lat, mean_lat, bb.max_lon, mean_lon}, func);
+        bboxSeparation(depth - 1, {bb.max_lat, mean_lat, mean_lon, bb.min_lon}, func);
+        bboxSeparation(depth - 1, {mean_lat, bb.min_lat, bb.max_lon, mean_lon}, func);
+        bboxSeparation(depth - 1, {mean_lat, bb.min_lat, mean_lon, bb.min_lon}, func);
+    }
+    else
+    {
+        func(bb);
+    }
 }

@@ -19,7 +19,7 @@ struct LoD
         return
         {
             bbox_area / 300.0,
-            bbox_area / 0.5
+            bbox_area / 1.0
         };
     }
 
