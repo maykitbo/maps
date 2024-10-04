@@ -39,3 +39,20 @@ coord_t GCS::toRadians(coord_t degree)
 {
     return degree * M_PI / 180.0;
 }
+
+
+point_s GCS::epsg4326toEpsg3857(point_s p)
+{
+    coord_t x = (p.lat * epsg_e) / 180.0;
+    coord_t y = std::log(std::tan((90.0 + p.lon) * M_PI / 360.0)) / (M_PI / 180.0);
+    y = (y * epsg_e) / 180.0;
+    return {x, y};
+}
+
+point_s GCS::epsg3857toEpsg4326(point_s p)
+{
+    double x = (p.lat * 180.0) / epsg_e;
+    double y = (p.lon * 180.0) / epsg_e;
+    y = (std::atan(std::pow(M_E, y * (M_PI / 180.0))) * 360.0) / M_PI - 90.0;
+    return {x, y};
+}
