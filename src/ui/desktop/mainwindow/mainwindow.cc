@@ -4,7 +4,7 @@
 using namespace maykitbo::maps;
 
 
-MainWindow::MainWindow(const IData& data, QWidget* parent) :
+MainWindow::MainWindow(IData& data, QWidget* parent) :
     QMainWindow(parent),
     data_(data),
     view_(new QGraphicsView(this)),

@@ -22,6 +22,8 @@ set(CORE_LIB_PATH CACHE PATH "Path to the core library")
 set(HEADERS
     mainwindow/mainwindow.h
     drawing/scene/scene.h
+    drawing/render/render.h
+    drawing/dataloader/dataloader.h
     drawing/sceneset/sceneset.h
     drawing/mapitems/mapitems.h
     drawing/style/map_style.h
@@ -32,7 +34,8 @@ set(SOURCES
     main.cc
     mainwindow/mainwindow.cc
     drawing/scene/scene.cc
-    drawing/scene/draw.cc
+    drawing/render/render.cc
+    drawing/dataloader/dataloader.cc
     drawing/scene/connect.cc
     drawing/sceneset/sceneset.cc
     drawing/mapitems/mapitems.cc
@@ -61,7 +64,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 target_include_directories(${PROJECT_NAME} PUBLIC 
     drawing
     drawing/scene
+    drawing/render
     drawing/sceneset
+    drawing/dataloader
     drawing/mapitems
     mainwindow
     drawing/style

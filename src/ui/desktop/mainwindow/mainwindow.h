@@ -17,10 +17,10 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
     public:
-        MainWindow(const IData& data, QWidget *parent = nullptr);
+        MainWindow(IData& data, QWidget *parent = nullptr);
 
     private:
-        const IData& data_;
+        IData& data_;
 
         QGraphicsView *view_;
         Scene *scene_;
